@@ -16,11 +16,11 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/knowledgeseekerch/dsh-prompt-weaver.git"
+    "url": "git+https://github.com/Knowledgeseekerch/dsh-prompt-weaver.git"
   },
-  "homepage": "https://github.com/knowledgeseekerch/dsh-prompt-weaver#readme",
+  "homepage": "https://github.com/Knowledgeseekerch/dsh-prompt-weaver#readme",
   "bugs": {
-    "url": "https://github.com/knowledgeseekerch/dsh-prompt-weaver/issues"
+    "url": "https://github.com/Knowledgeseekerch/dsh-prompt-weaver/issues"
   },
   "engines": {
     "node": ">=22.19.0"

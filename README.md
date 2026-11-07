@@ -50,7 +50,7 @@ The CLI does not call a model; it uses a deterministic local provider and never 
 Clone the repository, then install the bundle through DSH's plugin manager rather than editing profile files by hand:
 
 ```bash
-git clone https://github.com/knowledgeseekerch/dsh-prompt-weaver.git
+git clone https://github.com/Knowledgeseekerch/dsh-prompt-weaver.git
 cd dsh-prompt-weaver
 npm run check
 npm test
@@ -59,7 +59,7 @@ npm test
 In DSH Web, use `install_bundle` with the absolute path of the cloned directory. For repeatable installs, pin a commit:
 
 ```bash
-dsh plugin --profile web add github:knowledgeseekerch/dsh-prompt-weaver#v0.1.0
+dsh plugin --profile web add github:Knowledgeseekerch/dsh-prompt-weaver#v0.1.0
 ```
 
 Refresh the Web client. The sparkle button appears in the composer tool row. It does not send messages, listen for keystrokes, or modify project files.

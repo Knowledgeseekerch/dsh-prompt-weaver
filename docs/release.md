@@ -50,7 +50,7 @@ Also run the live DSH checklist in `docs/compatibility.md` before claiming suppo
 Users can install a tagged source snapshot:
 
 ```bash
-dsh plugin --profile web add github:knowledgeseekerch/dsh-prompt-weaver#v0.1.0
+dsh plugin --profile web add github:Knowledgeseekerch/dsh-prompt-weaver#v0.1.0
 ```
 
 ## CI
