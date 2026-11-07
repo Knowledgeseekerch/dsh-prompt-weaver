@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "team-standards",
+  "name": {
+    "zh": "团队规范",
+    "en": "Team standards"
+  },
+  "description": {
+    "zh": "把工程请求整理成团队模板，保留显式约束和验收方式。",
+    "en": "Organizes engineering requests into a team template with explicit constraints and acceptance."
+  },
+  "taskTypes": [
+    "code",
+    "review",
+    "test"
+  ],
+  "sections": [
+    {
+      "id": "goal",
+      "title": {
+        "zh": "目标",
+        "en": "Goal"
+      },
+      "guidance": {
+        "zh": "一句话说明要完成的变更。",
+        "en": "State the change in one sentence."
+      },
+      "required": true
+    },
+    {
+      "id": "scope",
+      "title": {
+        "zh": "范围",
+        "en": "Scope"
+      },
+      "guidance": {
+        "zh": "只列用户点名的文件、模块和符号。",
+        "en": "List only files, modules, and symbols named by the user."
+      }
+    },
+    {
+      "id": "constraints",
+      "title": {
+        "zh": "约束",
+        "en": "Constraints"
+      },
+      "guidance": {
+        "zh": "保留必须、不要、只能等原始约束。",
+        "en": "Preserve must, must-not, and only constraints verbatim."
+      }
+    },
+    {
+      "id": "validation",
+      "title": {
+        "zh": "验收",
+        "en": "Acceptance"
+      },
+      "guidance": {
+        "zh": "只写用户提供的测试或验收方式。",
+        "en": "Include only tests or acceptance criteria supplied by the user."
+      }
+    },
+    {
+      "id": "open-questions",
+      "title": {
+        "zh": "待确认",
+        "en": "Open questions"
+      },
+      "guidance": {
+        "zh": "缺失信息列为待确认。",
+        "en": "List missing information as open questions."
+      }
+    }
+  ]
+}

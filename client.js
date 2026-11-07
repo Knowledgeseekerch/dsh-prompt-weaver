@@ -1,0 +1,747 @@
+window.__ModuleLoader__.load({
+  id: 'dsh-prompt-weaver',
+  factory(require) {
+    const React = require('react')
+    const { Toast } = require('@deepseek-ai/dsh-client-ui-primitives')
+    const h = React.createElement
+    const NS = 'promptWeaver'
+    const ENDPOINT = 'promptWeaver/enhance'
+    const LIST_ENDPOINT = 'promptWeaver/listFrameworks'
+    const IMPORT_ENDPOINT = 'promptWeaver/importConfig'
+    const EXPORT_ENDPOINT = 'promptWeaver/exportConfig'
+    const MAX_HISTORY = 5
+    const MAX_IMPORT_CHARS = 1024 * 1024
+
+    const en = {
+      action: 'Open Prompt Weaver',
+      loading: 'Enhancing prompt…',
+      panelTitle: 'Prompt Weaver',
+      original: 'Original draft',
+      enhanced: 'Enhanced prompt',
+      mode: 'Mode',
+      framework: 'Framework',
+      minimal: 'Minimal',
+      standard: 'Standard',
+      strict: 'Strict',
+      enhance: 'Enhance',
+      apply: 'Replace draft',
+      undo: 'Undo',
+      iterate: 'Iterate',
+      feedback: 'Feedback for the next iteration',
+      feedbackPlaceholder: 'Explain what is still wrong. This is treated as a constraint.',
+      compare: 'Compare',
+      diff: 'Unified diff',
+      quality: 'Quality checks',
+      import: 'Import',
+      export: 'Export',
+      close: 'Close',
+      busy: 'The composer is busy',
+      empty: 'Type a prompt first',
+      attachments: 'Attachments preserved',
+      commandOnly: 'Add text after the slash command to enhance it.',
+      unavailable: 'Prompt Weaver is unavailable here',
+      failed: 'The model could not enhance this prompt',
+      applied: 'Draft replaced. Nothing was sent.',
+      undone: 'Previous version restored.',
+      discarded: 'The draft changed, so this result was discarded.',
+      imported: 'Configuration imported.',
+      exported: 'Configuration exported.',
+      tooLong: 'The draft is too long.',
+      sensitive: 'The draft appears to contain credentials or private keys.',
+      protected: 'Protected items',
+      constraints: 'Constraints',
+      openQuestions: 'Open questions',
+      score: 'Heuristic score',
+      context: 'Context',
+      noFrameworks: 'No frameworks available',
+      iteration: 'Iteration',
+      failedGate: 'The result failed the original-intent check.',
+    }
+
+    const zh = {
+      action: '打开 Prompt Weaver',
+      loading: '正在增强提示词…',
+      panelTitle: 'Prompt Weaver 提示词编织台',
+      original: '原始草稿',
+      enhanced: '增强结果',
+      mode: '模式',
+      framework: '框架',
+      minimal: '极简',
+      standard: '标准',
+      strict: '严格',
+      enhance: '增强',
+      apply: '替换草稿',
+      undo: '撤销',
+      iterate: '继续迭代',
+      feedback: '下一轮反馈',
+      feedbackPlaceholder: '说明还有什么问题。反馈会被当作约束处理。',
+      compare: '对比',
+      diff: '差异',
+      quality: '质量检查',
+      import: '导入',
+      export: '导出',
+      close: '关闭',
+      busy: '输入框正在忙',
+      empty: '请先输入提示词',
+      attachments: '附件保持不变',
+      commandOnly: '请在斜杠命令后补充自然语言。',
+      unavailable: '当前环境不支持 Prompt Weaver',
+      failed: '模型未能增强这条提示词',
+      applied: '草稿已替换，未自动发送。',
+      undone: '已恢复上一版。',
+      discarded: '草稿已变化，本次结果已丢弃。',
+      imported: '配置已导入。',
+      exported: '配置已导出。',
+      tooLong: '当前提示词过长。',
+      sensitive: '草稿可能包含凭据或私钥。',
+      protected: '受保护项',
+      constraints: '约束',
+      openQuestions: '待确认',
+      score: '启发式评分',
+      context: '上下文',
+      noFrameworks: '没有可用框架',
+      iteration: '迭代',
+      failedGate: '结果未通过原意保留检查。',
+    }
+
+    const css = `
+.dsh-pw-root {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+}
+.dsh-pw-button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, opacity 120ms ease;
+}
+.dsh-pw-button:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+.dsh-pw-button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+.dsh-pw-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--dsw-alias-bg-overlay, #000) 55%, transparent);
+}
+.dsh-pw-panel {
+  width: min(920px, 100%);
+  max-height: min(88vh, 900px);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--dsw-alias-border-primary);
+  background: var(--dsw-alias-bg-primary);
+  color: var(--dsw-alias-label-primary);
+  box-shadow: 0 18px 60px rgb(0 0 0 / 0.28);
+}
+.dsh-pw-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.dsh-pw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+}
+.dsh-pw-select,
+.dsh-pw-input,
+.dsh-pw-textarea,
+.dsh-pw-button-control {
+  font: inherit;
+  color: inherit;
+  background: var(--dsw-alias-bg-secondary);
+  border: 1px solid var(--dsw-alias-border-primary);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+.dsh-pw-textarea {
+  min-height: 120px;
+  font-family: var(--dsw-font-family-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.dsh-pw-readonly {
+  min-height: 72px;
+  max-height: 180px;
+  overflow: auto;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px dashed var(--dsw-alias-border-primary);
+  background: var(--dsw-alias-bg-secondary);
+  color: var(--dsw-alias-label-secondary);
+  white-space: pre-wrap;
+}
+.dsh-pw-button-control {
+  cursor: pointer;
+}
+.dsh-pw-button-control:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.dsh-pw-list {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+}
+.dsh-pw-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-secondary);
+}
+.dsh-pw-muted {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+}
+.dsh-pw-warn {
+  color: var(--dsw-alias-state-warning-primary);
+}
+.dsh-pw-error {
+  color: var(--dsw-alias-state-danger-primary);
+}
+.dsh-pw-ok {
+  color: var(--dsw-alias-state-success-primary);
+}
+.dsh-pw-hidden-input {
+  display: none;
+}
+`
+
+    function SparkleIcon() {
+      return h('svg', {
+        viewBox: '0 0 20 20',
+        width: 16,
+        height: 16,
+        'aria-hidden': true,
+        focusable: false,
+      },
+      h('path', {
+        d: 'M10 2.2l1.7 4.3 4.3 1.7-4.3 1.7L10 14.2 8.3 9.9 4 8.2l4.3-1.7z',
+        fill: 'currentColor',
+      }),
+      h('path', {
+        d: 'M15.4 12.6l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z',
+        fill: 'currentColor',
+        opacity: 0.6,
+      }))
+    }
+
+    function WeaverPanel(props) {
+      const {
+        useInput, inputActions, sessionId, rpc, t, onClose, requestBase, toast,
+      } = props
+      const draft = useInput(state => state.draft) ?? ''
+      const phase = useInput(state => state.phase) ?? 'plain'
+      const attachmentCount = useInput(state => state.attachmentIds?.length ?? 0) ?? 0
+      const occurrences = useInput(state => state.occurrences ?? []) ?? []
+
+      const [mode, setMode] = React.useState('standard')
+      const [frameworkId, setFrameworkId] = React.useState('auto')
+      const [frameworks, setFrameworks] = React.useState([])
+      const [feedback, setFeedback] = React.useState('')
+      const [status, setStatus] = React.useState({ kind: 'idle' })
+      const [result, setResult] = React.useState(null)
+      const [edited, setEdited] = React.useState('')
+      const [history, setHistory] = React.useState([])
+      const [view, setView] = React.useState('enhanced')
+      const [importing, setImporting] = React.useState(false)
+
+      const draftRef = React.useRef(draft)
+      draftRef.current = draft
+      const resultRef = React.useRef(null)
+      resultRef.current = result
+      const mountedRef = React.useRef(true)
+      const abortRef = React.useRef(null)
+      const fileInputRef = React.useRef(null)
+
+      React.useEffect(() => {
+        mountedRef.current = true
+        return () => {
+          mountedRef.current = false
+          abortRef.current?.abort()
+        }
+      }, [])
+
+      React.useEffect(() => {
+        let cancelled = false
+        if (rpc === undefined) return undefined
+        Promise.resolve(rpc.call('/api', LIST_ENDPOINT, { args: { agentId: sessionId, request: {} } }))
+          .then(response => {
+            if (cancelled || !mountedRef.current) return
+            const value = response?.value ?? response
+            if (value?.ok === true && Array.isArray(value.frameworks)) {
+              setFrameworks(value.frameworks)
+            }
+          })
+          .catch(() => {})
+        return () => { cancelled = true }
+      }, [rpc, sessionId])
+
+      const requestPayload = (iteration) => {
+        const base = { ...requestBase }
+        if (iteration === undefined) {
+          return {
+            text: draftRef.current,
+            mode,
+            frameworkId,
+            command: base.command,
+            occurrences: base.occurrences,
+            attachmentCount,
+          }
+        }
+        return {
+          text: resultRef.current?.originalText ?? draftRef.current,
+          mode,
+          frameworkId,
+          command: base.command,
+          occurrences: base.occurrences,
+          attachmentCount,
+          iteration,
+        }
+      }
+
+      const run = async (iteration) => {
+        if (rpc === undefined) {
+          toast('error', t('unavailable'))
+          return
+        }
+        const controller = new AbortController()
+        abortRef.current?.abort()
+        abortRef.current = controller
+        setStatus({ kind: 'loading' })
+        let response
+        try {
+          response = await rpc.call('/api', ENDPOINT, {
+            args: { agentId: sessionId, request: requestPayload(iteration) },
+          }, controller.signal)
+        } catch {
+          if (controller.signal.aborted) return
+          if (abortRef.current === controller) abortRef.current = null
+          setStatus({ kind: 'error', message: t('failed') })
+          toast('error', t('failed'))
+          return
+        }
+        if (!mountedRef.current || controller.signal.aborted) return
+        if (abortRef.current === controller) abortRef.current = null
+        const value = response?.value ?? response
+        if (value?.ok !== true) {
+          const message = typeof value?.message === 'string' && value.message.length > 0 ? value.message : t('failed')
+          setStatus({ kind: 'error', message })
+          toast('error', message)
+          return
+        }
+        const previous = resultRef.current?.text
+        if (previous !== undefined && history.length < MAX_HISTORY) {
+          setHistory(items => [...items, previous])
+        }
+        setResult(value)
+        setEdited(value.text)
+        setView('enhanced')
+        setFeedback('')
+        setStatus({ kind: 'success' })
+      }
+
+      const apply = () => {
+        if (typeof inputActions?.setDraft !== 'function') {
+          toast('error', t('unavailable'))
+          return
+        }
+        if (draftRef.current !== (resultRef.current?.originalText ?? '')) {
+          setStatus({ kind: 'error', message: t('discarded') })
+          toast('error', t('discarded'))
+          return
+        }
+        inputActions.setDraft(edited)
+        toast('success', t('applied'))
+        onClose()
+      }
+
+      const undo = () => {
+        setHistory(items => {
+          if (items.length === 0) return items
+          const previous = items[items.length - 1]
+          setEdited(previous)
+          if (resultRef.current !== null) {
+            setResult({ ...resultRef.current, text: previous })
+          }
+          toast('success', t('undone'))
+          return items.slice(0, -1)
+        })
+      }
+
+      const doImport = async (file) => {
+        if (rpc === undefined) {
+          toast('error', t('unavailable'))
+          return
+        }
+        if (file.size > MAX_IMPORT_CHARS) {
+          toast('error', t('failed'))
+          return
+        }
+        setImporting(true)
+        try {
+          const text = await file.text()
+          let bundle
+          try {
+            bundle = JSON.parse(text)
+          } catch {
+            toast('error', t('failed'))
+            return
+          }
+          const response = await rpc.call('/api', IMPORT_ENDPOINT, {
+            args: { agentId: sessionId, request: { bundle, conflict: 'replace' } },
+          })
+          const value = response?.value ?? response
+          if (value?.ok === true) {
+            const list = await rpc.call('/api', LIST_ENDPOINT, { args: { agentId: sessionId, request: {} } })
+            const listValue = list?.value ?? list
+            if (listValue?.ok === true && Array.isArray(listValue.frameworks)) setFrameworks(listValue.frameworks)
+            toast('success', t('imported'))
+          } else {
+            toast('error', typeof value?.message === 'string' ? value.message : t('failed'))
+          }
+        } catch {
+          toast('error', t('failed'))
+        } finally {
+          if (mountedRef.current) setImporting(false)
+        }
+      }
+
+      const doExport = async () => {
+        if (rpc === undefined) {
+          toast('error', t('unavailable'))
+          return
+        }
+        try {
+          const response = await rpc.call('/api', EXPORT_ENDPOINT, { args: { agentId: sessionId, request: {} } })
+          const value = response?.value ?? response
+          if (value?.ok !== true) {
+            toast('error', typeof value?.message === 'string' ? value.message : t('failed'))
+            return
+          }
+          const blob = new Blob([JSON.stringify(value.bundle, null, 2)], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const anchor = document.createElement('a')
+          anchor.href = url
+          anchor.download = 'dsh-prompt-weaver-config.json'
+          anchor.click()
+          URL.revokeObjectURL(url)
+          toast('success', t('exported'))
+        } catch {
+          toast('error', t('failed'))
+        }
+      }
+
+      const disabled = phase !== 'plain' || draft.trim().length === 0
+      const busy = status.kind === 'loading'
+
+      return h('div', {
+        className: 'dsh-pw-overlay',
+        role: 'dialog',
+        'aria-modal': 'true',
+        'aria-label': t('panelTitle'),
+      },
+      h('style', null, css),
+      h('div', { className: 'dsh-pw-panel' },
+        h('div', { className: 'dsh-pw-row' },
+          h('strong', null, t('panelTitle')),
+          h('span', { className: 'dsh-pw-muted' }, `(${t('iteration')}: ${result?.iteration?.round ?? 0})`),
+          h('div', { style: { marginLeft: 'auto' } },
+            h('button', { type: 'button', className: 'dsh-pw-button-control', onClick: onClose }, t('close'))
+          )
+        ),
+        h('label', { className: 'dsh-pw-field' }, t('original'),
+          h('div', { className: 'dsh-pw-readonly' }, draft)
+        ),
+        attachmentCount > 0
+          ? h('div', { className: 'dsh-pw-ok' }, `${t('attachments')}: ${attachmentCount}`)
+          : null,
+        h('div', { className: 'dsh-pw-row' },
+          h('label', { className: 'dsh-pw-field' }, t('mode'),
+            h('select', {
+              className: 'dsh-pw-select',
+              value: mode,
+              onChange: event => setMode(event.target.value),
+            },
+              h('option', { value: 'minimal' }, t('minimal')),
+              h('option', { value: 'standard' }, t('standard')),
+              h('option', { value: 'strict' }, t('strict'))
+            )
+          ),
+          h('label', { className: 'dsh-pw-field' }, t('framework'),
+            h('select', {
+              className: 'dsh-pw-select',
+              value: frameworkId,
+              onChange: event => setFrameworkId(event.target.value),
+            },
+              h('option', { value: 'auto' }, t('framework')),
+              frameworks.map(framework => h('option', { key: framework.id, value: framework.id },
+                typeof framework.name === 'object'
+                  ? (framework.name.zh ?? framework.name.en ?? framework.id)
+                  : framework.id
+              ))
+            )
+          ),
+          h('button', {
+            type: 'button',
+            className: 'dsh-pw-button-control',
+            disabled: disabled || busy,
+            onClick: () => run(undefined),
+          }, busy ? t('loading') : t('enhance'))
+        ),
+        h('div', { className: 'dsh-pw-row' },
+          h('button', { type: 'button', className: 'dsh-pw-button-control', onClick: doExport }, t('export')),
+          h('button', {
+            type: 'button',
+            className: 'dsh-pw-button-control',
+            disabled: importing,
+            onClick: () => fileInputRef.current?.click(),
+          }, t('import')),
+          h('input', {
+            ref: fileInputRef,
+            className: 'dsh-pw-hidden-input',
+            type: 'file',
+            accept: 'application/json,.json',
+            onChange: event => {
+              const file = event.target.files?.[0]
+              if (file !== undefined) doImport(file)
+              event.target.value = ''
+            },
+          })
+        ),
+        result === null ? null : h('div', { className: 'dsh-pw-list' },
+          h('div', { className: 'dsh-pw-row' },
+            h('button', { type: 'button', className: 'dsh-pw-button-control', onClick: apply }, t('apply')),
+            h('button', {
+              type: 'button',
+              className: 'dsh-pw-button-control',
+              disabled: history.length === 0,
+              onClick: undo,
+            }, t('undo')),
+            h('button', {
+              type: 'button',
+              className: 'dsh-pw-button-control',
+              onClick: () => run({
+                round: Math.min(MAX_HISTORY, (result.iteration?.round ?? 0) + 1),
+                previousText: result.text,
+                feedback,
+              }),
+              disabled: busy || feedback.trim().length === 0 || result.iteration?.canIterate !== true,
+            }, t('iterate')),
+            h('button', {
+              type: 'button',
+              className: 'dsh-pw-button-control',
+              onClick: () => setView(view === 'diff' ? 'enhanced' : 'diff'),
+            }, view === 'diff' ? t('compare') : t('diff'))
+          ),
+          h('label', { className: 'dsh-pw-field' }, t('enhanced'),
+            h('textarea', {
+              className: 'dsh-pw-textarea',
+              value: edited,
+              onChange: event => setEdited(event.target.value),
+            })
+          ),
+          view === 'diff'
+            ? h('pre', { className: 'dsh-pw-readonly' }, renderDiff(result.originalText, edited))
+            : h('pre', { className: 'dsh-pw-readonly' }, edited),
+          h('label', { className: 'dsh-pw-field' }, t('feedback'),
+            h('input', {
+              className: 'dsh-pw-input',
+              value: feedback,
+              placeholder: t('feedbackPlaceholder'),
+              onChange: event => setFeedback(event.target.value),
+            })
+          ),
+          renderQuality(result, t),
+          renderAnalysis(result, t),
+          renderContext(result, t)
+        ),
+        status.kind === 'error' ? h('div', { className: 'dsh-pw-error' }, status.message) : null,
+        status.kind === 'success' ? h('div', { className: 'dsh-pw-ok' }, t('score') + ': ' + (result?.quality?.score ?? 0)) : null
+      ))
+    }
+
+    function WeaverButton(props) {
+      const { useInput, inputActions, sessionId, t, rpc, showToast } = props
+      const draft = useInput(state => state.draft) ?? ''
+      const phase = useInput(state => state.phase) ?? 'plain'
+      const occurrences = useInput(state => state.occurrences ?? []) ?? []
+      const attachmentCount = useInput(state => state.attachmentIds?.length ?? 0) ?? 0
+      const [open, setOpen] = React.useState(false)
+      const [toast, setToast] = React.useState(null)
+      const toastSeq = React.useRef(0)
+      const mountedRef = React.useRef(true)
+
+      React.useEffect(() => {
+        mountedRef.current = true
+        return () => { mountedRef.current = false }
+      }, [])
+
+      const toastFn = React.useCallback((kind, text) => {
+        if (!mountedRef.current) return
+        toastSeq.current += 1
+        setToast({ seq: toastSeq.current, kind, text })
+        showToast?.(kind, text)
+      }, [showToast])
+
+      const requestBase = React.useMemo(() => ({
+        command: inferCommand(draft),
+        occurrences: occurrences.map(occurrence => ({
+          source: occurrence.source,
+          ref: occurrence.ref,
+          offset: occurrence.offset,
+          length: occurrence.length,
+          label: occurrence.label,
+          appearance: occurrence.appearance,
+          clipboardText: occurrence.clipboardText,
+        })),
+        attachmentCount,
+      }), [draft, occurrences, attachmentCount])
+
+      const disabled = phase !== 'plain' || draft.trim().length === 0
+      const title = phase !== 'plain' ? t('busy') : draft.trim().length === 0 ? t('empty') : t('action')
+
+      const toastNode = toast === null
+        ? null
+        : h(Toast, {
+          key: toast.seq,
+          text: toast.text,
+          onDone: () => { if (mountedRef.current) setToast(null) },
+        })
+
+      return h('div', { className: 'dsh-pw-root' },
+        h('style', null, css),
+        toastNode,
+        h('button', {
+          type: 'button',
+          className: 'dsh-pw-button',
+          'aria-label': t('action'),
+          title,
+          disabled,
+          onMouseDown: event => event.preventDefault(),
+          onClick: () => setOpen(true),
+        }, h(SparkleIcon)),
+        open
+          ? h(WeaverPanel, {
+            useInput,
+            inputActions,
+            sessionId,
+            rpc,
+            t,
+            requestBase,
+            onClose: () => setOpen(false),
+            toast: toastFn,
+          })
+          : null
+      )
+    }
+
+    function inferCommand(draft) {
+      const match = /^\/[^\s]+/u.exec(draft)
+      return match === null ? undefined : match[0]
+    }
+
+    function renderQuality(result, t) {
+      const quality = result.quality
+      if (quality === undefined) return null
+      return h('div', { className: 'dsh-pw-card' },
+        h('strong', null, t('quality')),
+        h('div', { className: 'dsh-pw-muted' },
+          `${t('score')}: ${quality.score}; ${t('compare')}: ${result.comparison?.delta?.score ?? 0}`),
+        h('ul', null,
+          (quality.metrics?.retainedConstraintIds ?? []).length >= 0
+            ? h('li', null, `${t('constraints')}: ${quality.metrics?.constraintCount ?? 0}`)
+            : null,
+          h('li', null, `${t('protected')}: ${quality.metrics?.retainedProtectedItemCount ?? 0}/${quality.metrics?.protectedItemCount ?? 0}`)
+        ),
+        quality.passed ? h('div', { className: 'dsh-pw-ok' }, 'OK') : h('div', { className: 'dsh-pw-error' }, t('failedGate'))
+      )
+    }
+
+    function renderAnalysis(result, t) {
+      const analysis = result.analysis
+      if (analysis === undefined) return null
+      return h('div', { className: 'dsh-pw-card' },
+        h('strong', null, `${t('framework')}: ${result.framework ?? '-'}; ${t('mode')}: ${result.mode ?? '-'}`),
+        h('div', { className: 'dsh-pw-muted' }, `${t('protected')}: ${result.analysis?.constraints?.length ?? 0}; ${t('openQuestions')}: ${result.openQuestions?.length ?? 0}`)
+      )
+    }
+
+    function renderContext(result, t) {
+      const context = result.context
+      if (context === undefined) return null
+      return h('div', { className: 'dsh-pw-card' },
+        h('strong', null, t('context')),
+        h('div', { className: 'dsh-pw-muted' },
+          `project: ${context.projectAvailable ? 'yes' : 'no'}; conversation: ${context.conversationMessages ?? 0}; redactions: ${context.redactions ?? 0}`)
+      )
+    }
+
+    function renderDiff(original, enhanced) {
+      const left = String(original).split(/(\s+)/u).filter(token => token.length > 0)
+      const right = String(enhanced).split(/(\s+)/u).filter(token => token.length > 0)
+      const prefix = commonPrefix(left, right)
+      const suffix = commonSuffix(left.slice(prefix), right.slice(prefix))
+      const lines = []
+      for (const token of left.slice(0, prefix)) lines.push(`  ${token}`)
+      for (const token of left.slice(prefix, left.length - suffix)) lines.push(`- ${token}`)
+      for (const token of right.slice(prefix, right.length - suffix)) lines.push(`+ ${token}`)
+      for (const token of left.slice(left.length - suffix)) lines.push(`  ${token}`)
+      return lines.join('')
+    }
+
+    function commonPrefix(left, right) {
+      let index = 0
+      while (index < left.length && index < right.length && left[index] === right[index]) index += 1
+      return index
+    }
+
+    function commonSuffix(left, right) {
+      let index = 0
+      while (index < left.length && index < right.length && left[left.length - 1 - index] === right[right.length - 1 - index]) index += 1
+      return index
+    }
+
+    return {
+      inject: ['slots', 'connection', 'locale'],
+      apply(ctx) {
+        ctx.effect(() => ctx.locale.register(NS, { en, zh }))
+        const rpc = ctx.connection?.rpc
+        ctx.slots.inject('conversation.input.right', () => ctx.slots.register({
+          name: 'conversation.input.right',
+          id: 'dsh-prompt-weaver',
+          order: 15,
+          locale: NS,
+        }, props => h(WeaverButton, { ...props, rpc })))
+      },
+    }
+  },
+})

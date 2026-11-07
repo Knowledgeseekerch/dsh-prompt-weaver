@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "research-plan",
+  "name": {
+    "zh": "研究计划",
+    "en": "Research plan"
+  },
+  "description": {
+    "zh": "把调研请求整理成问题、范围、证据、输出和验证。",
+    "en": "Organizes research requests into question, scope, evidence, output, and validation."
+  },
+  "taskTypes": [
+    "research",
+    "general"
+  ],
+  "sections": [
+    {
+      "id": "question",
+      "title": {
+        "zh": "研究问题",
+        "en": "Research question"
+      },
+      "guidance": {
+        "zh": "只重述用户要回答的问题。",
+        "en": "Restate only the question the user wants answered."
+      },
+      "required": true
+    },
+    {
+      "id": "scope",
+      "title": {
+        "zh": "范围",
+        "en": "Scope"
+      },
+      "guidance": {
+        "zh": "保留用户给出的时间、地域、语言和候选范围。",
+        "en": "Preserve user-supplied time, region, language, and candidate scope."
+      }
+    },
+    {
+      "id": "evidence",
+      "title": {
+        "zh": "证据",
+        "en": "Evidence"
+      },
+      "guidance": {
+        "zh": "只使用用户或参考材料允许的来源。",
+        "en": "Use only sources allowed by the user or reference material."
+      }
+    },
+    {
+      "id": "constraints",
+      "title": {
+        "zh": "约束",
+        "en": "Constraints"
+      },
+      "guidance": {
+        "zh": "逐条保留原约束。",
+        "en": "Preserve original constraints verbatim."
+      }
+    },
+    {
+      "id": "open-questions",
+      "title": {
+        "zh": "待确认",
+        "en": "Open questions"
+      },
+      "guidance": {
+        "zh": "列出必须用户确认的问题，不假设。",
+        "en": "List only questions requiring user confirmation; do not assume."
+      }
+    },
+    {
+      "id": "output",
+      "title": {
+        "zh": "输出",
+        "en": "Output"
+      },
+      "guidance": {
+        "zh": "说明用户要求的交付物。",
+        "en": "State the deliverable requested by the user."
+      }
+    }
+  ]
+}

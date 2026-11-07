@@ -1,0 +1,9 @@
+{
+  "action": "打开 Prompt Weaver",
+  "loading": "正在增强提示词…",
+  "panelTitle": "Prompt Weaver 提示词编织台",
+  "empty": "请先输入提示词",
+  "busy": "输入框正在忙",
+  "unavailable": "当前环境不支持 Prompt Weaver",
+  "failed": "模型未能增强这条提示词"
+}

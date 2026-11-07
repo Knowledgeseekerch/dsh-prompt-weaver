@@ -1,0 +1,77 @@
+{
+  "name": "dsh-prompt-weaver",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Framework-aware prompt enhancement plugin for DeepSeek Harness with original-intent preservation checks, context-aware iteration, and offline CLI.",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "prompt",
+    "prompt-enhancement",
+    "prompt-engineering",
+    "ai-coding"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knowledgeseekerch/dsh-prompt-weaver.git"
+  },
+  "homepage": "https://github.com/knowledgeseekerch/dsh-prompt-weaver#readme",
+  "bugs": {
+    "url": "https://github.com/knowledgeseekerch/dsh-prompt-weaver/issues"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "bin": {
+    "dsh-prompt-weaver": "./bin/dsh-prompt-weaver.js"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./core": "./src/core/index.js",
+    "./host": "./src/host/service.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "bin",
+    "src",
+    "schemas",
+    "locale",
+    "icon.svg",
+    "cordis.patch.yml",
+    "examples",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "docs"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage tests/*.test.js",
+    "check": "node scripts/check.mjs",
+    "lint": "node scripts/lint.mjs",
+    "cli:smoke": "node bin/dsh-prompt-weaver.js enhance --input examples/input/basic.txt --provider local --json >/dev/null && node bin/dsh-prompt-weaver.js frameworks list --config examples/config/dsh-prompt-weaver.config.json",
+    "frameworks:validate": "node bin/dsh-prompt-weaver.js frameworks validate examples/frameworks",
+    "pack:dry-run": "npm pack --dry-run --cache /tmp/dsh-prompt-weaver-npm-cache"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  }
+}

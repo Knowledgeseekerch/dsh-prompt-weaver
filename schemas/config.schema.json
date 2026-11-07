@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/dsh-prompt-weaver/config.schema.json",
+  "title": "DSH Prompt Weaver Host Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mode",
+    "defaultFramework",
+    "maxDraftChars",
+    "maxResultChars",
+    "maxOutputTokens",
+    "timeoutMs",
+    "temperature",
+    "maxIterations",
+    "includeAssistantMessages",
+    "maxConversationMessages",
+    "maxConversationChars",
+    "context",
+    "privacy",
+    "persistFrameworks"
+  ],
+  "properties": {
+    "mode": { "enum": ["minimal", "standard", "strict"] },
+    "defaultFramework": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "maxDraftChars": { "type": "integer", "minimum": 200, "maximum": 50000 },
+    "maxResultChars": { "type": "integer", "minimum": 200, "maximum": 80000 },
+    "maxOutputTokens": { "type": "integer", "minimum": 128, "maximum": 16384 },
+    "timeoutMs": { "type": "integer", "minimum": 1000, "maximum": 180000 },
+    "temperature": { "type": "number", "minimum": 0, "maximum": 1 },
+    "maxIterations": { "type": "integer", "minimum": 1, "maximum": 10 },
+    "includeAssistantMessages": { "type": "boolean" },
+    "maxConversationMessages": { "type": "integer", "minimum": 0, "maximum": 50 },
+    "maxConversationChars": { "type": "integer", "minimum": 0, "maximum": 50000 },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "maxFiles",
+        "maxFileBytes",
+        "maxTotalBytes",
+        "maxTreeEntries",
+        "maxScanDirs",
+        "maxIndexFiles",
+        "maxIndexSources",
+        "maxIndexedFileBytes",
+        "maxDepth"
+      ],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "maxFiles": { "type": "integer", "minimum": 0, "maximum": 30 },
+        "maxFileBytes": { "type": "integer", "minimum": 1024, "maximum": 262144 },
+        "maxTotalBytes": { "type": "integer", "minimum": 4096, "maximum": 524288 },
+        "maxTreeEntries": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "maxScanDirs": { "type": "integer", "minimum": 0, "maximum": 2000 },
+        "maxIndexFiles": { "type": "integer", "minimum": 0, "maximum": 20000 },
+        "maxIndexSources": { "type": "integer", "minimum": 0, "maximum": 8000 },
+        "maxIndexedFileBytes": { "type": "integer", "minimum": 1024, "maximum": 1048576 },
+        "maxDepth": { "type": "integer", "minimum": 0, "maximum": 10 }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["redactSecrets", "blockSensitiveDraft", "maxRedactions"],
+      "properties": {
+        "redactSecrets": { "type": "boolean" },
+        "blockSensitiveDraft": { "type": "boolean" },
+        "maxRedactions": { "type": "integer", "minimum": 1, "maximum": 1000 }
+      }
+    },
+    "persistFrameworks": { "type": "boolean" },
+    "frameworksFile": { "type": "string", "minLength": 1, "maxLength": 4096 },
+    "provider": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "model": { "type": "string", "minLength": 1, "maxLength": 200 }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["provider"] },
+      "then": { "required": ["model"] }
+    },
+    {
+      "if": { "required": ["model"] },
+      "then": { "required": ["provider"] }
+    },
+    {
+      "if": {
+        "properties": {
+          "persistFrameworks": { "const": true }
+        },
+        "required": ["persistFrameworks"]
+      },
+      "then": { "required": ["frameworksFile"] }
+    }
+  ]
+}

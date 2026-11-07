@@ -1,0 +1,33 @@
+name: Feature request
+description: Propose a focused improvement with a concrete use case and boundary.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: What prompt-engineering workflow does this improve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the behavior and public API/config shape.
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Boundaries and privacy impact
+      description: Explain what must not change, especially data sent to models or persistence behavior.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: This does not add a runtime dependency without justification.
+        - label: This does not persist prompt text, project content, or secrets.
+        - label: I considered compatibility and testability.

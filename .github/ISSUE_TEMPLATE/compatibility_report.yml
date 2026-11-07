@@ -1,0 +1,73 @@
+name: Compatibility report
+description: Report a live DSH version where Prompt Weaver does not load or behaves incorrectly.
+labels: ["compatibility", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Compatibility reports help us keep DSH-specific code isolated. Please include the exact DSH version and the result of each probe below. Do not paste prompt text, project files, secrets, or model credentials.
+  - type: input
+    id: dsh-version
+    attributes:
+      label: DeepSeek Harness version
+      description: Exact version and commit if available.
+      placeholder: "e.g. 0.2.1-rc.3 @ abc1234"
+    validations:
+      required: true
+  - type: input
+    id: profile
+    attributes:
+      label: DSH profile
+      description: Profile used to run the Web UI.
+      placeholder: "web"
+    validations:
+      required: true
+  - type: dropdown
+    id: button-visible
+    attributes:
+      label: Is the sparkle button visible after refresh?
+      options:
+        - "Yes"
+        - "No"
+        - "Unclear"
+    validations:
+      required: true
+  - type: dropdown
+    id: rpc-result
+    attributes:
+      label: What did the enhance RPC return?
+      options:
+        - "Not tested"
+        - "ok: true"
+        - "ok: false with reason"
+        - "RPC rejected / connection error"
+        - "No request observed"
+    validations:
+      required: true
+  - type: textarea
+    id: probe
+    attributes:
+      label: Probe results
+      description: |
+        Paste only non-sensitive technical output, such as reason codes and console errors. Do not paste prompts, project content, or credentials.
+      placeholder: |
+        1. Plain text draft:
+        2. /command + text draft:
+        3. Draft with @file:
+        4. Draft with attachment:
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Host/console logs
+      placeholder: "Paste redacted logs only."
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "Describe what should happen."
+    validations:
+      required: true

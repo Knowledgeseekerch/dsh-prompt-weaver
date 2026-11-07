@@ -1,0 +1,1 @@
+/prompt 请阅读 @src/app.ts 和 https://example.com/spec ，在 Node.js 22.19 下修复登录问题。不要引入新的依赖，只能修改 src/login.ts。

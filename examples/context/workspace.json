@@ -1,0 +1,25 @@
+{
+  "files": [
+    {
+      "id": "file:1",
+      "path": "src/login.ts",
+      "content": "export function submit() {\n  // Next step: wire the form submit handler\n  return false\n}\n"
+    },
+    {
+      "id": "file:2",
+      "path": "src/app.ts",
+      "content": "import { submit } from './login'\nexport function render() {\n  return submit()\n}\n"
+    }
+  ],
+  "tree": [
+    "src/",
+    "src/login.ts",
+    "src/app.ts"
+  ],
+  "conversation": [
+    {
+      "role": "user",
+      "text": "The login button does nothing when clicked."
+    }
+  ]
+}

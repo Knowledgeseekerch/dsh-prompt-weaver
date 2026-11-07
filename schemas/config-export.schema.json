@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/dsh-prompt-weaver/config-export.schema.json",
+  "title": "DSH Prompt Weaver Configuration Export",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kind", "preferences", "frameworks"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "dsh-prompt-weaver.config" },
+    "preferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "defaultFramework", "maxIterations", "includeAssistantMessages"],
+      "properties": {
+        "mode": { "enum": ["minimal", "standard", "strict"] },
+        "defaultFramework": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "maxIterations": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "includeAssistantMessages": { "type": "boolean" }
+      }
+    },
+    "frameworks": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "framework.schema.json" }
+    }
+  }
+}

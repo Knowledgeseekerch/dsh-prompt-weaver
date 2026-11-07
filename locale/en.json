@@ -1,0 +1,9 @@
+{
+  "action": "Open Prompt Weaver",
+  "loading": "Enhancing prompt…",
+  "panelTitle": "Prompt Weaver",
+  "empty": "Type a prompt first",
+  "busy": "The composer is busy",
+  "unavailable": "Prompt Weaver is unavailable here",
+  "failed": "The model could not enhance this prompt"
+}
