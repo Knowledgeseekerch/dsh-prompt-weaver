@@ -139,7 +139,8 @@ window.__ModuleLoader__.load({
   display: grid;
   place-items: center;
   padding: 24px;
-  background: color-mix(in srgb, var(--dsw-alias-bg-overlay, #000) 55%, transparent);
+  background: color-mix(in srgb, var(--dsw-alias-bg-overlay, #000) 72%, transparent);
+  backdrop-filter: blur(4px);
 }
 .dsh-pw-panel {
   width: min(920px, 100%);
@@ -150,8 +151,8 @@ window.__ModuleLoader__.load({
   gap: 12px;
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid var(--dsw-alias-border-primary);
-  background: var(--dsw-alias-bg-primary);
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-base, var(--dsw-alias-bg-layer-2));
   color: var(--dsw-alias-label-primary);
   box-shadow: 0 18px 60px rgb(0 0 0 / 0.28);
 }
@@ -175,8 +176,8 @@ window.__ModuleLoader__.load({
 .dsh-pw-button-control {
   font: inherit;
   color: inherit;
-  background: var(--dsw-alias-bg-secondary);
-  border: 1px solid var(--dsw-alias-border-primary);
+  background: var(--dsw-alias-bg-layer-1);
+  border: 1px solid var(--dsw-alias-border-l2);
   border-radius: 8px;
   padding: 6px 8px;
 }
@@ -192,8 +193,8 @@ window.__ModuleLoader__.load({
   overflow: auto;
   padding: 8px;
   border-radius: 8px;
-  border: 1px dashed var(--dsw-alias-border-primary);
-  background: var(--dsw-alias-bg-secondary);
+  border: 1px dashed var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-1);
   color: var(--dsw-alias-label-secondary);
   white-space: pre-wrap;
 }
@@ -215,7 +216,7 @@ window.__ModuleLoader__.load({
   gap: 4px;
   padding: 8px;
   border-radius: 8px;
-  background: var(--dsw-alias-bg-secondary);
+  background: var(--dsw-alias-bg-layer-1);
 }
 .dsh-pw-muted {
   color: var(--dsw-alias-label-secondary);
@@ -367,6 +368,16 @@ window.__ModuleLoader__.load({
         setView('enhanced')
         setFeedback('')
         setStatus({ kind: 'success' })
+        // 增强完成后直接把结果写回输入框，省掉「应用」这一步。
+        // 面板保持打开，方便查看 diff、质量分和上下文；写回失败不阻断结果展示。
+        if (typeof inputActions?.setDraft === 'function') {
+          try {
+            inputActions.setDraft(value.text)
+            toast('success', t('applied'))
+          } catch {
+            // 写回异常时保留面板内的结果，用户仍可手动点「应用」
+          }
+        }
       }
 
       const apply = () => {
@@ -385,16 +396,16 @@ window.__ModuleLoader__.load({
       }
 
       const undo = () => {
-        setHistory(items => {
-          if (items.length === 0) return items
-          const previous = items[items.length - 1]
-          setEdited(previous)
-          if (resultRef.current !== null) {
-            setResult({ ...resultRef.current, text: previous })
-          }
-          toast('success', t('undone'))
-          return items.slice(0, -1)
-        })
+        if (history.length === 0) return
+        const previous = history[history.length - 1]
+        setHistory(items => items.slice(0, -1))
+        setEdited(previous)
+        if (resultRef.current !== null) {
+          setResult({ ...resultRef.current, text: previous })
+        }
+        // 撤销时同步回写输入框，避免面板内容与输入框不一致
+        if (typeof inputActions?.setDraft === 'function') inputActions.setDraft(previous)
+        toast('success', t('undone'))
       }
 
       const doImport = async (file) => {
