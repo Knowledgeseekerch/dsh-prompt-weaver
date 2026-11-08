@@ -1,4 +1,5 @@
 import { describeDimensions, pickSlots } from './domains.js'
+import { GENERIC_BLUEPRINT, blueprintFor } from './blueprints.js'
 import { freezeDeep } from './utils.js'
 
 export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultChars, domains, completeness }) {
@@ -15,6 +16,7 @@ export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultCha
     'One thing is NOT an addition: reporting that the premise itself does not hold. If the draft asks for something that cannot work as stated — for example "move an installed desktop application to a USB drive and keep it running", where registry entries, services, and absolute paths never live in the install directory — set "premiseCheck": {"holds":false,"problem":"...","alternative":"..."}. Still produce the enhanced prompt the draft asked for, scope unchanged. This is a flag, not a redesign: it must not drop a requirement, must not add a feature, and must not turn the task into a different one. Omit premiseCheck when the premise holds. Keep both strings under 300 characters.',
     'Flag a premise only when the impossibility is concrete: a physical or logical contradiction, not a missing detail. Doubt, ambiguity, and "it depends" are not premise failures — those belong in openQuestions.',
     'When the draft is a diagnosis (something broke, hangs, runs slow, or will not start), do three things before listing any fix. (1) Name the phenomenon: if the description matches a standard term, write that term, because the name decides where to look (black screen with English text and a prompt to restart = a BugCheck; fans spinning but no image = a POST display failure; a command spinner pausing for seconds = a timeout someone is waiting on, not slowness). (2) Promote the excluding evidence: a clause like "not only the big files", "the same happens in an empty document", "it used to be fine" removes whole branches of causes at once — move it to the front and say what it rules out, never bury it inside a sentence. (3) Name where the evidence lives: the dump directory, the event id, the log path, the exact field to read. "Send a screenshot" without naming which line matters is empty advice.',
+    'When a constraint is phrased as "do not X" or "avoid Y", never turn it into a keyword blacklist. A closed word list cannot catch synonyms: "no rotation" is bypassed by "spiral", "swirl", "orbiting", or "a full sweep". Instead, require the executor to list the motion or imagery each approach actually relies on, and to state per item whether it belongs to the forbidden family by meaning rather than by wording. Requiring that self-check is sharpening; handing them the word list is not.',
     'Every stage or step you write must carry an observable pass condition: a number, a signal, or a visible state. "Stable", "fast", and "works well" are not pass conditions.',
     'Every action, object, and outcome named in the draft must survive into the enhanced prompt. Never drop one because a different section already mentions the topic, and never collapse several named actions into one.',
     'Preserve every protected item from the draft verbatim, including slash commands, file references, code spans, URLs, and versions.',
@@ -54,12 +56,25 @@ export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultCha
     for (const line of describeDimensions(domains, locale)) instructions.push(`- ${line}`)
   }
 
+  // 骨架：先告诉执行方「答全了长什么样」，再谈缺什么。
+  // 只报缺口而不给结构，用户拿到的是一张动不了手的清单；
+  // 给了骨架，缺口就变成「这次由你定」的少数几项。
+  if (framework === undefined || framework.id !== 'question') {
+    const domainId = Array.isArray(domains) && domains.length > 0 ? domains[0].id : undefined
+    const skeleton = (domainId !== undefined ? blueprintFor(domainId, locale) : undefined)
+      ?? (locale === 'zh' ? GENERIC_BLUEPRINT.zh : GENERIC_BLUEPRINT.en)
+    instructions.push(`Structure the enhanced prompt along this work breakdown unless the draft already gives its own: ${skeleton}. The skeleton fixes the order and the coverage of a complete answer; it is a skeleton, not a decision. Never fill it with parts, numbers, prices, or vendors the draft did not mention.`)
+  }
+
   // 缺口分两条路走：堵住任务定义的才问人，其余折成「参数 + 默认值」。
   // 之前一律要求「执行方必须指定」，一份普通任务能吐出十几条待确认，
   // 执行方拿到反而动不了手——把待确认减到能开工的量，才是增强该做的。
   const { blocking, soft } = splitGaps(completeness)
   if (blocking.length > 0) {
-    instructions.push('These gaps block the definition: without them the task cannot be stated. Keep them as items the executor must confirm with the user, and never answer them yourself:')
+    // 0.4.0：阻塞项不再先变成问题。行业内存在惯例时，采用惯例并写明依据与可替换方式，
+    // 用户拿到的是一份能开工的方案加一句「换成你实际的型号即可」，而不是四道必答题。
+    // 只有「选哪个会改变交付物形态且没有惯例」时才真的问。
+    instructions.push('These gaps are load-bearing: without an answer the task cannot be executed. Do NOT turn them into questions first. For each one, adopt the conventional choice for this kind of work, state it explicitly together with its basis, and mark it replaceable ("K-type thermocouple, the common default for this range — swap in the type you actually have"; "HAL library, since you did not name a standard-library project"). A stated, overridable default is a better answer than a question. Ask the user only when the choice changes the shape of the deliverable and no convention exists:')
     for (const line of blocking) instructions.push(`- ${line}`)
   }
   if (soft.length > 0) {

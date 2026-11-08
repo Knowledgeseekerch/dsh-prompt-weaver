@@ -81,8 +81,9 @@ test('blocking gaps are confirmed, the rest become parameters with defaults', ()
     domains,
     completeness,
   })
-  // 阻塞项仍要求跟用户确认。
-  assert.match(system, /block the definition/u)
+  // 阻塞项不再先变成问题：先采用行业惯例、写明依据与可替换方式，只有没有惯例时才问。
+  assert.match(system, /load-bearing/u)
+  assert.match(system, /mark it replaceable/u)
   // 非阻塞项明确不许变成提问，要折成带默认值的输入。
   assert.match(system, /Do not turn them into questions/u)
   assert.match(system, /input of the deliverable with a sensible default/u)
@@ -90,7 +91,7 @@ test('blocking gaps are confirmed, the rest become parameters with defaults', ()
   assert.match(system, /at most three items/u)
 })
 
-test('a software draft with no probes does not invent gaps', () => {
+test('a software draft now gets its gaps judged', () => {
   const text = '帮我写个 Python 脚本批量缩图'
   const domains = detectDomains(text)
   const completeness = assessCompleteness({ draft: { originalText: text }, domains, locale: 'zh' })
@@ -102,12 +103,13 @@ test('a software draft with no probes does not invent gaps', () => {
     domains,
     completeness,
   })
-  // 没有探针就不该凭空造缺口，但仍然要按参数化规则办事。
-  assert.equal(system.includes('block the definition'), false)
+  // 软件领域已补探针：接口契约与验收方式都缺，应当报成必须先定，
+  // 而不是像 0.3.3 那样标 unprobed、什么都不说。
+  assert.equal(completeness.source, 'rule')
+  assert.ok(completeness.gaps.length > 0)
+  assert.match(system, /load-bearing/u)
+  // 非阻塞缺口仍按参数化规则处理，不许回退成十几个待确认。
   assert.match(system, /could become an input of the deliverable/u)
-  // 也不能报成「没有缺口」：那是没判定，不是判定通过。
-  assert.equal(completeness.source, 'unprobed')
-  assert.equal(completeness.gaps.length, 0)
 })
 
 test('the general framework asks for defaults before it asks for questions', () => {

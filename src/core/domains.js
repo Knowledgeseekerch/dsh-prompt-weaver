@@ -40,7 +40,15 @@ const DOMAINS = Object.freeze([
         id: 'control-layer',
         zh: '控制逻辑与软件分层：主循环怎么转、状态怎么切、上下位怎么通信',
         en: 'control logic and the software split: the main loop, the state transitions, how the layers talk',
-        slots: { zh: ['主循环', '状态切换', '通信协议'], en: ['main loop', 'state transitions', 'protocol'] },
+        slots: { zh: ['主循环', '状态切换', '通信协议', '控制律'], en: ['main loop', 'state transitions', 'protocol', 'control law'] },
+      },
+      {
+        // 「用 PWM 驱动加热」这类话一旦没写进必答项，答案就停在「调一下占空比」，
+        // 而真正决定能不能用的功率器件、驱动方式和保护全都缺席。
+        id: 'actuation',
+        zh: '执行机构与驱动：驱动方式、功率器件、占空比或频率、过流过热保护',
+        en: 'the actuator and its driver: drive method, power device, duty cycle or frequency, over-current and over-temperature protection',
+        slots: { zh: ['驱动方式', '功率器件', '占空比或频率', '保护'], en: ['drive method', 'power device', 'duty or frequency', 'protection'] },
       },
       {
         id: 'power-interface',
@@ -50,8 +58,8 @@ const DOMAINS = Object.freeze([
       },
       {
         id: 'assembly-order',
-        zh: '装配与首次上电的顺序，每步之前该确认什么',
-        en: 'the assembly and first-power-on order, and what to confirm before each step',
+        zh: '初始化与首次上电的顺序（外设初始化、装配先后），每步之前该确认什么',
+        en: 'the initialisation and first-power-on order (peripheral init, assembly sequence), and what to confirm before each step',
         slots: { zh: ['装配顺序', '上电前检查'], en: ['assembly order', 'pre-power checks'] },
       },
       {
@@ -66,21 +74,41 @@ const DOMAINS = Object.freeze([
         en: 'the most common failure symptoms for this kind of build and the order to check them in',
         slots: { zh: ['典型现象', '排查顺序'], en: ['typical symptom', 'check order'] },
       },
+      {
+        // 采集链路是传感器类任务真正会翻车的地方：不带这层，答案会停在「用 ADC 读一下」，
+        // 而冷端补偿、线性化、量程换算恰恰是决定读数对不对的全部内容。
+        id: 'sensing',
+        zh: '采集链路：信号调理、采样与分辨率、标定与线性化、补偿方式、滤波',
+        en: 'the acquisition chain: signal conditioning, sampling and resolution, calibration and linearisation, compensation, filtering',
+        slots: {
+          zh: ['信号调理', '采样与分辨率', '标定与线性化', '补偿', '滤波'],
+          en: ['signal conditioning', 'sampling and resolution', 'calibration and linearisation', 'compensation', 'filtering'],
+        },
+      },
+      {
+        id: 'error-budget',
+        zh: '误差预算：主要误差来源各自贡献多少、用什么措施压缩',
+        en: 'the error budget: what each error source contributes and how it is reduced',
+        slots: { zh: ['误差来源', '改善措施'], en: ['error sources', 'mitigation'] },
+      },
     ],
   },
   {
     id: 'software',
     keywords: [
       '程序', '代码', '函数', '接口', '系统', '应用', '服务', '脚本', '数据库', '模块', '重构', '编译',
-      '批量', '脚本处理',
-      'api', 'sdk', 'web', 'app', 'backend', 'frontend', 'library', 'cli', 'server', 'database', 'code',
+      '批量', '脚本处理', '爬虫', '前端', '后端', '网页', '网站', '小程序', '登录页', '单元测试', '算法',
+      '调试', '报错信息', '虚拟环境', '依赖包',
+      'python', 'flask', 'django', 'fastapi', 'pandas', 'numpy', 'node', 'npm', 'react', 'vue',
+      'javascript', 'typescript', 'java', 'golang', 'rust', 'api', 'sdk', 'web', 'app',
+      'backend', 'frontend', 'library', 'cli', 'server', 'database', 'code',
     ],
     dimensions: [
       {
         id: 'modules',
         zh: '模块划分与各自职责边界',
         en: 'the modules and the boundary of each responsibility',
-        slots: { zh: ['模块清单', '职责边界'], en: ['module list', 'responsibility boundary'] },
+        slots: { zh: ['模块清单', '职责边界', '入口与路由'], en: ['module list', 'responsibility boundary', 'entry and routes'] },
       },
       {
         id: 'contract',
@@ -105,6 +133,13 @@ const DOMAINS = Object.freeze([
         zh: '可自动执行的验收方式：命令、断言、期望输出',
         en: 'an automatically runnable acceptance check: command, assertion, expected output',
         slots: { zh: ['命令', '期望输出'], en: ['command', 'expected output'] },
+      },
+      {
+        // 登录页、表单、接口这类任务，校验与会话不是「加分项」而是能不能上线。
+        id: 'security',
+        zh: '安全与校验：输入如何校验、凭证与会话如何管理、权限边界在哪',
+        en: 'safety and validation: how input is validated, how credentials and sessions are handled, where the permission boundary sits',
+        slots: { zh: ['输入校验', '凭证与会话', '权限边界'], en: ['input validation', 'credentials and sessions', 'permission boundary'] },
       },
     ],
   },
@@ -151,7 +186,8 @@ const DOMAINS = Object.freeze([
     id: 'writing',
     keywords: [
       '文章', '文案', '邮件', '报告', '总结', '演讲稿', '简章', '通告', '推文', '说明文', '汇报',
-      'essay', 'article', 'email', 'report', 'copywriting', 'newsletter',
+      '摘要', '润色', '改写', '措辞', '文风', '学术', '润饰', '答辩稿', '论文摘要', '改写一下',
+      'essay', 'article', 'email', 'report', 'copywriting', 'newsletter', 'abstract', 'rewrite', 'polish',
     ],
     dimensions: [
       {
@@ -319,6 +355,107 @@ const DOMAINS = Object.freeze([
         zh: '失效模式：典型失效、排查顺序',
         en: 'failure modes: typical failure, check order',
         slots: { zh: ['典型失效', '排查顺序'], en: ['typical failure', 'check order'] },
+      },
+    ],
+  },
+  {
+    // 诊断类任务单独成域：它的必答项不是「要做什么」，而是「现象叫什么、证据在哪」。
+    // 缺了这层，0.3.3 写进系统提示词的诊断三步就落不到判定层——规则要求先命名现象，
+    // 判定层却认不出这是诊断任务，于是检查空转、什么都报不出来。
+    id: 'diagnosis',
+    keywords: [
+      '蓝屏', '黑屏', '报错', '错误信息', '异常退出', '崩溃', '闪退', '死机', '卡死', '卡顿',
+      '无响应', '未响应', '开不了机', '启动不了', '起不来', '排查', '诊断', '故障', '不工作',
+      '很慢', '很卡', '占满', '重启', '停止代码', '事件查看器',
+      'bluescreen', 'bugcheck', 'crash', 'exception', 'traceback', 'error', 'fails', 'freeze',
+      'hang', 'slow', 'unresponsive', 'troubleshoot', 'debug', 'dump',
+    ],
+    dimensions: [
+      {
+        id: 'symptom',
+        zh: '现象本身：什么情况下出现、多频繁、原话是什么',
+        en: 'the symptom itself: when it appears, how often, and the exact wording',
+        slots: { zh: ['现象原话', '发生时机', '频率'], en: ['verbatim symptom', 'when it happens', 'frequency'] },
+      },
+      {
+        id: 'naming',
+        zh: '现象对应的标准名称或错误标识，名字决定去哪查',
+        en: 'the standard name or error identifier of the symptom; the name decides where to look',
+        slots: { zh: ['标准名称', '错误码'], en: ['standard name', 'error code'] },
+      },
+      {
+        id: 'exclusion',
+        zh: '已经排除了什么，以及凭什么排除',
+        en: 'what has already been ruled out, and on what evidence',
+        slots: { zh: ['已排除项', '排除依据'], en: ['ruled out', 'evidence for it'] },
+      },
+      {
+        id: 'evidence',
+        zh: '证据在哪里取：日志路径、事件 ID、dump 或截图位置',
+        en: 'where the evidence lives: log path, event id, dump or screenshot location',
+        slots: { zh: ['证据位置', '关键字段'], en: ['evidence location', 'field to read'] },
+      },
+      {
+        id: 'environment',
+        zh: '出问题时的环境快照与最近的变更',
+        en: 'the environment snapshot at failure time and what changed recently',
+        slots: { zh: ['系统与版本', '硬件配置', '最近变更'], en: ['os and version', 'hardware', 'recent change'] },
+      },
+      {
+        id: 'reproduce',
+        zh: '能否稳定复现，以及怎么复现',
+        en: 'whether it reproduces reliably, and the steps that trigger it',
+        slots: { zh: ['复现步骤', '复现概率'], en: ['reproduction steps', 'reproduction rate'] },
+      },
+      {
+        // 「先软件后硬件」的渐进排查靠的就是这几招：缩小范围、对照、跑健康检测。
+        // 不点名这三样，产出的排查清单只能停在「更新驱动、重装系统」。
+        id: 'isolation',
+        zh: '隔离验证：用安全模式或干净启动缩小范围、用对照环境验证、跑内存与磁盘健康检测',
+        en: 'isolation: narrow the scope with safe mode or a clean boot, verify against a control environment, run memory and disk health checks',
+        slots: { zh: ['最小复现环境', '对照验证', '健康检测'], en: ['minimal environment', 'control comparison', 'health checks'] },
+      },
+    ],
+  },
+  {
+    // 数据处理类：合并、去重、对齐这类活干错的代价是数据错了却没人发现。
+    // 必答项是「哪个字段是对齐依据」「冲突时留谁」，而不是「用什么工具」。
+    id: 'data',
+    keywords: [
+      'csv', 'excel', 'xlsx', '表格', '数据表', '数据集', '数据清洗', '合并', '合成一张', '拼接',
+      '去重', '字段', '列名', '行数', '透视', '汇总', '统计表', '筛选', '对齐', '缺失值', '清单',
+      'json', 'jsonl', 'tsv', 'parquet', 'dataframe', 'pandas', 'sql', 'duplicate', 'merge', 'join', 'clean',
+    ],
+    dimensions: [
+      {
+        id: 'inputs',
+        zh: '输入源：几个文件、什么格式与编码、多大规模',
+        en: 'the inputs: how many files, what format and encoding, how large',
+        slots: { zh: ['文件来源', '格式与编码', '数据规模'], en: ['file source', 'format and encoding', 'size'] },
+      },
+      {
+        id: 'schema',
+        zh: '字段与类型：每一列是什么、缺失值怎么处理、多个源文件的列结构是否一致',
+        en: 'the fields and types: what each column holds, how missing values are handled, and whether the sources share one column structure',
+        slots: { zh: ['字段名', '类型', '缺失值处理', '列结构一致性'], en: ['field names', 'types', 'missing-value rule', 'column alignment'] },
+      },
+      {
+        id: 'keys',
+        zh: '对齐依据：用哪个键匹配，匹配不上怎么办',
+        en: 'the join key, and what happens when a record has no match',
+        slots: { zh: ['连接键', '未匹配处理'], en: ['join key', 'unmatched handling'] },
+      },
+      {
+        id: 'rules',
+        zh: '清洗与去重规则：什么算重复、留哪一条、顺序如何',
+        en: 'the cleaning and dedup rules: what counts as a duplicate, which one wins, what order',
+        slots: { zh: ['去重判据', '保留规则'], en: ['duplicate rule', 'keep rule'] },
+      },
+      {
+        id: 'output',
+        zh: '输出目标与对账：落到哪、用什么数对得上（合并类任务的对账式是「输入行数之和 = 输出行数 + 删除数」）',
+        en: 'the output target and its reconciliation: where it lands, and which numbers must add up (for a merge, inputs total = output rows + removed rows)',
+        slots: { zh: ['输出格式', '校验方式', '行数对账'], en: ['output format', 'verification', 'row reconciliation'] },
       },
     ],
   },

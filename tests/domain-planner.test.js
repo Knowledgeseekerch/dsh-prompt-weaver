@@ -155,7 +155,8 @@ test('the engine plans dimensions for an unknown domain before enhancing', async
       totalBytes: 0,
     }),
   })
-  const result = await engine.enhance({ text: '帮我把简历润色一下' })
+  // 这份草稿不能命中任何内置领域：一旦命中快路径，自举就不会发生。
+  const result = await engine.enhance({ text: '帮我把这份材料按我的习惯重新安排一遍' })
   // 第一次是自举维度，第二次才是增强正身。
   assert.equal(systems.length, 2)
   assert.equal(result.ok, true)

@@ -31,7 +31,8 @@ function rowById(id) {
 }
 
 test('the corpus keeps its expected shape', () => {
-  assert.equal(rows.length, 49)
+  // 0.4.0 补了 12 条（WorkBuddy 对照 5 条 + 诊断/数据/机械/软件各若干）。
+  assert.ok(rows.length >= 61, String(rows.length))
   const levels = new Set(rows.map(row => row.level))
   assert.deepEqual([...levels].sort(), ['E', 'L0', 'L1', 'L2', 'L3', 'L4', 'L5'])
   for (const row of rows) {
@@ -119,4 +120,21 @@ test('the evaluation is deterministic across the whole corpus', () => {
   for (const row of rows) {
     assert.deepEqual(evaluate(row).report, evaluate(row).report, row.id)
   }
+})
+
+test('every entry that reaches a domain gets judged, never unprobed', () => {
+  // 九个内置领域现在全部配了探针。命中领域却退回 unprobed，
+  // 只可能是新领域的探针 key 与槽位中文名没对上——那等于白写。
+  for (const row of rows) {
+    const { domains, report } = evaluate(row)
+    if (domains.length === 0) continue
+    assert.notEqual(report.source, 'unprobed', `${row.id} ${row.raw.slice(0, 24)}`)
+    assert.ok(report.summary.totalSlots > 0, row.id)
+  }
+})
+
+test('the corpus keeps at least twenty judgeable entries', () => {
+  const judged = rows.filter(row => evaluate(row).report.source === 'rule')
+  // 0.3.3 时是 14/49：五个领域只有维度没有探针，命中也是空转。
+  assert.ok(judged.length >= 20, `${judged.length}/49`)
 })

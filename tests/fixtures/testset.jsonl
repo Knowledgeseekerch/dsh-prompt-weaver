@@ -47,3 +47,15 @@
 {"id":"B3","group":"controlled","level":"L3","domain":"教育/控制理论","raw":"用大白话给没学过控制的人讲 PID，别用公式","probe":"同题梯度 B 第三级","expect":"禁止项存活","risk":"禁止项被吞"}
 {"id":"B4","group":"controlled","level":"L4","domain":"教育/控制理论","raw":"面向高一学生讲 PID，用空调控温类比，先给直觉再讲三个参数，最后给调参顺序，禁止微分方程，200 字内","probe":"同题梯度 B 第四级","expect":"5 项约束与输出顺序保留","risk":"擅自调整顺序或放宽字数"}
 {"id":"B5","group":"controlled","level":"L5","domain":"教育/控制理论","raw":"为「PID 控制」产出三份讲解稿，分别面向：A 小学生（只用生活类比，零术语）、B 机械专业大二（允许 Kp/Ki/Kd 符号，但不出现拉普拉斯变换）、C 控制方向研究生（要求给出离散化位置式/增量式表达式并说明抗积分饱和）。三份稿共用同一个空调控温类比，且每份都必须回答「为什么只调 P 会留静差」。输出为单个 Markdown 文档：一级标题为受众，其下用表格列 类比映射 / 关键结论 / 常见误区 三行；文末附一个 6 项的交叉检查表，逐项标注三份稿是否满足。约束：任一份稿不得超过 180 字；B 稿中 Kp/Ki/Kd 每个符号首次出现必须紧跟一句白话解释；不得编造具体教材或文献名称。","probe":"同题梯度 B 终点，多受众+交叉检查","expect":"三受众约束矩阵与交叉检查表完整","risk":"受众间约束串味、编造文献名称"}
+{"id":"WB-01","group":"parity","level":"L4","domain":"hardware","raw":"用 STM32 读取热电偶温度，实现完整的温度采集功能","probe":"WorkBuddy 对照 1","expect":"命中 hardware，采集链路与误差预算成为必答项","risk":"只报主控与电源，漏掉冷端补偿与线性化"}
+{"id":"WB-02","group":"parity","level":"L4","domain":"software","raw":"用 Flask 实现一个登录页面，包含用户名和密码输入表单、身份验证逻辑与登录成功失败提示","probe":"WorkBuddy 对照 2","expect":"命中 software，路由、校验与会话成为必答项","risk":"因「登录」被判成操作类"}
+{"id":"WB-03","group":"parity","level":"L4","domain":"hardware","raw":"使用 STM32 编写嵌入式 C 代码实现 PID 温度控制系统，通过 ADC 采集热电偶并经 PWM 驱动加热","probe":"WorkBuddy 对照 3","expect":"命中 hardware，控制律与执行驱动成为必答项","risk":"漏掉 PWM 驱动与过流保护"}
+{"id":"N-01","group":"main","level":"L4","domain":"诊断","raw":"电脑蓝屏了，黑底白字提示重启，怎么排查","probe":"诊断类","expect":"命中 diagnosis","risk":"不命中任何领域，判定空转"}
+{"id":"N-02","group":"main","level":"L4","domain":"诊断","raw":"程序跑着跑着就卡死了，任务管理器显示无响应","probe":"诊断类","expect":"命中 diagnosis","risk":"被判成软件任务"}
+{"id":"D-01","group":"main","level":"L4","domain":"数据","raw":"把这三个 csv 合成一张表，去掉重复行","probe":"数据处理","expect":"命中 data","risk":"不命中任何领域"}
+{"id":"D-02","group":"main","level":"L4","domain":"数据","raw":"把这学期的实验数据整理成汇总表，按组别统计均值","probe":"数据处理","expect":"命中 data","risk":"被判成写作或调研"}
+{"id":"M-01","group":"main","level":"L4","domain":"机械/工程","raw":"画一个 200x120 的 Q235 支架，板厚 8，用来装电机","probe":"机械件","expect":"命中 mechanical，几何与材料部分覆盖","risk":"覆盖率恒为 0"}
+{"id":"M-02","group":"main","level":"L4","domain":"机械/工程","raw":"设计一个法兰盘，DN50，PN16，材料 304，配 8 个 M16 螺栓","probe":"机械件","expect":"命中 mechanical","risk":"不命中任何领域"}
+{"id":"S-01","group":"main","level":"L4","domain":"软件","raw":"帮我写个 Python 脚本批量缩图","probe":"脚本","expect":"命中 software 且可判定","risk":"命中却标 unprobed"}
+{"id":"WB-04","group":"parity","level":"L4","domain":"data","raw":"读取并合并指定的三个 CSV 文件为一张表，按行纵向拼接，删除完全重复的行，输出新文件并说明合并后的总行数与移除的重复行数量","probe":"WorkBuddy 对照 4","expect":"命中 data，行数对账与判重口径成为必答项","risk":"只给合并脚本，没有对账数"}
+{"id":"WB-05","group":"parity","level":"L4","domain":"diagnosis","raw":"帮我系统化排查电脑蓝屏故障，先列需要收集的关键信息，再给从软件到硬件的渐进式排查流程","probe":"WorkBuddy 对照 5","expect":"命中 diagnosis，隔离验证手段成为必答项","risk":"只堆「更新驱动、重装系统」而无法定位"}

@@ -81,9 +81,11 @@ test('a fully described dimension leaves gaps and lands in covered', () => {
 })
 
 test('dimensions without a registered probe are not judged', () => {
+  // 用一组不存在的领域/维度 id，测的是「探针缺失」这个机制本身；
+  // 内置领域现在已经全部配了探针，不能再拿某个真实领域当反例。
   const domains = [{
-    id: 'research',
-    dimensions: [{ id: 'scope', zh: '检索范围', en: 'scope', slots: { zh: ['来源'], en: ['sources'] } }],
+    id: 'no-such-domain',
+    dimensions: [{ id: 'no-such-dimension', zh: '未登记的维度', en: 'unregistered', slots: { zh: ['来源'], en: ['sources'] } }],
   }]
   const result = assessCompleteness({ draft: draftOf('帮我调研一下'), domains, locale: 'zh' })
   // 没探针不等于没缺口：来源标成 unprobed，面板才不会显示「没有必须补的缺口」。
