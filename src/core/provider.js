@@ -26,20 +26,26 @@ export function createDshModelProvider({ ctx, config, session }) {
       }
 
       let budget = resolveInitialBudget(config, user)
-      for (let attempt = 0; attempt < 3; attempt += 1) {
+      for (;;) {
+        // 每轮之前都检查取消：用户在上一轮期间点了取消，就不能再发下一轮。
+        assertAbort(signal)
         try {
           return await streamOnce({ llm, route, system, user, budget, config, signal })
         } catch (error) {
+          // 取消优先于重试：先确认 signal 没被 abort，再判断是否因截断重试。
+          assertAbort(signal)
           const truncated = error instanceof PromptWeaverError && error.code === TRUNCATION_CODE
-          if (!truncated || budget >= MAX_OUTPUT_TOKENS) throw error
-          // 输出被截断：翻倍预算重试，而不是把半截结果丢掉或直接报错。
+          if (!truncated) throw error
+          if (budget >= MAX_OUTPUT_TOKENS) {
+            throw new PromptWeaverError(
+              'model-failed',
+              `The model hit the output cap even at ${budget} tokens; shorten the draft or raise the model limit.`,
+            )
+          }
+          // 输出被截断：翻倍预算重试，直到真正用上 MAX_OUTPUT_TOKENS。
           budget = Math.min(budget * 2, MAX_OUTPUT_TOKENS)
         }
       }
-      throw new PromptWeaverError(
-        'model-failed',
-        `The model kept hitting the output token cap even at ${MAX_OUTPUT_TOKENS} tokens; shorten the draft or raise the model limit.`,
-      )
     },
   }
 }

@@ -4,6 +4,20 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-11-08
+
+### Fixed
+
+- Retry loop reported "even at 16000 tokens" without ever using that budget; it now doubles until `MAX_OUTPUT_TOKENS` is genuinely reached, and reports the real value.
+- A cancelled request could still start the next retry round: `assertAbort` now runs before and after every attempt.
+- English markers matched inside longer words (`import` in important, `who` in Wholesale, `fix` in prefix); they now require word boundaries.
+- `BUILD_MARKERS` treated nouns such as 页面 / 接口 / 模型 / 代码 as build requests, so genuine operations fell through to general or code; it now keeps verbs only.
+- Operation classification now takes precedence over question, so 如何打开抖音并点赞 is treated as an operation.
+
+### Added
+
+- `tests/classification.test.js` and `tests/provider-retry.test.js`. Suite grew from 52 to 75 cases covering retry budgets, cancellation semantics and classifier edge cases.
+
 ## [0.2.0] - 2026-11-08
 
 ### Added
