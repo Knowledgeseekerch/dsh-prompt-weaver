@@ -1,6 +1,7 @@
 import { analyzeDraft, extractConstraints } from './analyze.js'
 import { MODES } from './constants.js'
 import { PromptWeaverError } from './errors.js'
+import { TASK_TYPES } from './constants.js'
 import { parseMixedDraft } from './draft.js'
 import { comparePrompts } from './quality.js'
 import { evaluateQuality } from './quality.js'
@@ -241,6 +242,13 @@ export function createPromptWeaverEngine({
 
   function normalizeTaskType(requested, detected) {
     if (requested === undefined || requested === 'auto') return detected
+    // 非法值不再静默退化成 general：直接报错，并列出合法取值。
+    if (!TASK_TYPES.includes(requested)) {
+      throw new PromptWeaverError(
+        'invalid-value',
+        `request.taskType must be one of: ${TASK_TYPES.join(', ')}.`,
+      )
+    }
     return requested
   }
 

@@ -32,7 +32,9 @@ export async function collectContext({ fs, root, session, draft, config, signal 
 
   try {
     const project = await collectProject({ fs, root, draft, config, signal })
-    const redactedFiles = project.files.map(file => redactSecrets(file.content, config.privacy.maxRedactions))
+    const redactEnabled = config.privacy.redactSecrets !== false
+    const redactedFiles = project.files.map(file =>
+      redactEnabled ? redactSecrets(file.content, config.privacy.maxRedactions) : { text: file.content, redactions: [] })
     const files = project.files.map((file, index) => ({
       id: `file:${index + 1}`,
       path: file.path,
@@ -135,6 +137,16 @@ async function collectProject({ fs, root, draft, config, signal }) {
     assertAbort(signal)
     if (remainingTotal <= 0) break
     try {
+      // 能拿到 size 就先判，避免把超大文件整个读进内存；拿不到再退回读后检查。
+      if (typeof fs.stat === 'function') {
+        try {
+          const info = await fs.stat(file.target)
+          const size = typeof info === 'number' ? info : info?.info?.size ?? info?.size
+          if (typeof size === 'number' && size > config.context.maxIndexedFileBytes) continue
+        } catch {
+          // stat 失败不阻断读取，交给下面的读后检查
+        }
+      }
       const raw = await fs.readText(file.target)
       const limit = Math.min(config.context.maxFileBytes, remainingTotal)
       const content = typeof raw === 'string' ? raw : String(raw ?? '')

@@ -83,7 +83,8 @@ async function streamOnce({ llm, route, system, user, budget, config, signal, ti
     const stream = llm.stream({
       provider: route.provider,
       model: route.model,
-      purpose: 'prompt-weaver',
+      // DSH 的 GenerateOptions.purpose 只接受 'compaction' | 'session-title'；
+      // 这里不传，避免超出官方联合类型。
       system,
       messages: [{ role: 'user', content: [{ type: 'text', text: user }] }],
       maxTokens: budget,

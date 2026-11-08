@@ -279,7 +279,7 @@ window.__ModuleLoader__.load({
 
     function WeaverPanel(props) {
       const {
-        useInput, inputActions, sessionId, rpc, t, onClose, requestBase, toast,
+        useInput, inputActions, sessionId, rpc, t, onClose, requestBase, toast, initialResult,
       } = props
       const draft = useInput(state => state.draft) ?? ''
       const phase = useInput(state => state.phase) ?? 'plain'
@@ -292,8 +292,8 @@ window.__ModuleLoader__.load({
       const [feedback, setFeedback] = React.useState('')
       const [status, setStatus] = React.useState({ kind: 'idle' })
       const [closing, setClosing] = React.useState(false)
-      const [result, setResult] = React.useState(null)
-      const [edited, setEdited] = React.useState('')
+      const [result, setResult] = React.useState(initialResult ?? null)
+      const [edited, setEdited] = React.useState(initialResult?.text ?? '')
       const [history, setHistory] = React.useState([])
       const [view, setView] = React.useState('enhanced')
       const [importing, setImporting] = React.useState(false)
@@ -676,6 +676,7 @@ window.__ModuleLoader__.load({
       const title = phase !== 'plain' ? t('busy') : draft.trim().length === 0 ? t('empty') : t('action')
 
       const [busy, setBusy] = React.useState(false)
+      const [pendingResult, setPendingResult] = React.useState(null)
 
       // 一键增强：不弹面板，点一下就跑，结果直接写回输入框。
       // 右键按钮仍可打开完整面板（差异对比、迭代、导入导出）。
@@ -722,9 +723,18 @@ window.__ModuleLoader__.load({
             toastFn('error', reason === undefined ? message : `[${reason}] ${message}`)
             return
           }
-          if (typeof inputActions?.setDraft === 'function') inputActions.setDraft(value.text)
+          const violations = value.violations?.length ?? 0
+          const assumptions = value.assumptions?.length ?? 0
           const score = value.quality?.score
-          toastFn('success', score === undefined ? t('applied') : `${t('applied')} (${t('score')}: ${score})`)
+          if (violations === 0 && assumptions === 0 && typeof inputActions?.setDraft === 'function') {
+            inputActions.setDraft(value.text)
+            toastFn('success', score === undefined ? t('applied') : `${t('applied')} (${t('score')}: ${score})`)
+            return
+          }
+          // 有违规或假设时先不覆盖草稿：交给面板展示，由用户确认后再应用。
+          setPendingResult(value)
+          setOpen(true)
+          toastFn('error', `${violations} violation(s), ${assumptions} assumption(s) - review before applying`)
         } catch {
           toastFn('error', t('failed'))
         } finally {
@@ -764,8 +774,12 @@ window.__ModuleLoader__.load({
             rpc,
             t,
             requestBase,
-            onClose: () => setOpen(false),
+            onClose: () => {
+              setOpen(false)
+              setPendingResult(null)
+            },
             toast: toastFn,
+            initialResult: pendingResult,
           })
           : null
       )

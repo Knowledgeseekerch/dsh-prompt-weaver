@@ -3,6 +3,7 @@ import { exportConfiguration, importConfiguration } from '../core/config-io.js'
 import { MAX_IMPORT_BYTES, SERVICE_NAME } from '../core/constants.js'
 import { PromptWeaverError } from '../core/errors.js'
 import { normalizeError } from '../core/errors.js'
+import { currentScope, runWithScope } from './request-scope.js'
 
 export function createHostService({ ctx, config, frameworkStore, engine, logger }) {
   const service = {
@@ -11,13 +12,11 @@ export function createHostService({ ctx, config, frameworkStore, engine, logger 
         if (agent?.session === undefined) {
           throw new PromptWeaverError('unavailable', 'No live session is attached to this request.')
         }
-        service.currentAgent = agent
-        try {
+        // 每个请求在自己的作用域里执行：并发时不会互相覆盖 session。
+        return await runWithScope({ agent, session: agent.session }, async () => {
           const result = await engine.enhance(request ?? {}, { signal })
           return { ok: true, ...result }
-        } finally {
-          service.currentAgent = undefined
-        }
+        })
       } catch (error) {
         const normalized = normalizeError(error)
         logger?.warn?.('dsh-prompt-weaver enhance failed:', normalized.reason)
@@ -71,8 +70,8 @@ export function createHostService({ ctx, config, frameworkStore, engine, logger 
 
     contextProvider: ({ draft, signal }) => collectContext({
       fs: ctx.get('fs'),
-      root: resolveRoot(ctx, service.currentAgent?.session),
-      session: service.currentAgent?.session,
+      root: resolveRoot(ctx, currentScope()?.session),
+      session: currentScope()?.session,
       draft,
       config,
       signal,

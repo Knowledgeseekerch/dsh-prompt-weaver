@@ -130,7 +130,9 @@ test('host service enhances a mixed draft through the DSH llm seam', async () =>
   assert.ok(result.text.includes('@src/app.ts'))
   assert.ok(result.text.includes('不要修改数据库'))
   assert.equal(result.quality.passed, true)
-  assert.equal(state.llmOptions.purpose, 'prompt-weaver')
+  // DSH 的 GenerateOptions.purpose 只有 'compaction' | 'session-title'，
+  // 这里断言不传，避免使用未定义的取值。
+  assert.equal(state.llmOptions.purpose, undefined)
   assert.equal(state.llmOptions.provider, 'fixture')
   assert.equal(state.llmOptions.model, 'fixture-model')
   assert.equal(result.context.projectAvailable, true)

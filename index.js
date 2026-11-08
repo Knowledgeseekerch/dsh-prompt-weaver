@@ -8,6 +8,7 @@ import { createDshModelProvider } from './src/core/provider.js'
 import { SERVICE_NAME } from './src/core/constants.js'
 import { createTypertDescriptor } from './src/host/descriptor.js'
 import { createHostService, resolveRoot } from './src/host/service.js'
+import { currentScope } from './src/host/request-scope.js'
 
 export { readConfig } from './src/core/config.js'
 export { createFrameworkStore } from './src/core/frameworks.js'
@@ -27,7 +28,7 @@ export function apply(ctx, configInput = {}) {
   const provider = {
     id: 'dsh',
     async complete(call) {
-      const session = service?.currentAgent?.session
+      const session = currentScope()?.session
       const dshProvider = createDshModelProvider({ ctx, config, session })
       return dshProvider.complete(call)
     },
@@ -39,8 +40,8 @@ export function apply(ctx, configInput = {}) {
     provider,
     contextProvider: ({ draft, signal }) => collectContext({
       fs: ctx.get('fs'),
-      root: resolveRoot(ctx, service?.currentAgent?.session),
-      session: service?.currentAgent?.session,
+      root: resolveRoot(ctx, currentScope()?.session),
+      session: currentScope()?.session,
       draft,
       config,
       signal,

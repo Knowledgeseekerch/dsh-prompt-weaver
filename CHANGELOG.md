@@ -4,6 +4,25 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2026-11-08
+
+### Fixed
+
+- Concurrent enhance requests could read each other's session: `service.currentAgent` was a shared mutable field. Requests now run inside an `AsyncLocalStorage` scope, so the provider and context collector always see the session that belongs to the call.
+- One-click enhance overwrote the composer even when the result carried violations or assumptions. It now writes back only when both are empty; otherwise the panel opens with the result and the user decides.
+- `llm.stream` was sent `purpose: 'prompt-weaver'`, which is outside the documented `'compaction' | 'session-title'` union. The field is no longer sent.
+- An unknown `request.taskType` silently degraded to the `general` framework; it now raises `invalid-value` and lists the valid values.
+- `privacy.redactSecrets: false` had no effect because file redaction ran unconditionally; the switch is honoured now.
+- Oversized files were read in full before the size check. When `fs.stat` is available the file is skipped before reading, with the previous behaviour kept as a fallback.
+
+### Changed
+
+- 36 stray `.bak` copies were removed from the repository. `scripts/check.mjs` now fails when a backup file appears, and `package.json` excludes `**/*.bak*` from the published package.
+
+### Added
+
+- `tests/request-scope.test.js`: concurrent scope isolation, nested scopes, and leakage checks.
+
 ## [0.2.3] - 2026-11-08
 
 ### Fixed

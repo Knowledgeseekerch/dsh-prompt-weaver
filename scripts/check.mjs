@@ -38,6 +38,12 @@ for (const file of jsonFiles) {
   }
 }
 
+// 备份文件不得进入仓库：它们会被打包、被搜索命中，也容易与正式源码混淆。
+const backupFiles = walk(root, name => /\.bak/u.test(name))
+for (const file of backupFiles) {
+  errors.push(`${file}: backup files must not live in the repository`)
+}
+
 if (errors.length > 0) {
   process.stderr.write(`check failed:\n\n${errors.join('\n\n')}\n`)
   process.exitCode = 1
