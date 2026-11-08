@@ -112,7 +112,9 @@ export function assessCompleteness({ draft, domains, locale = 'zh' } = {}) {
     })
   }
 
-  if (totalSlots === 0) return emptyReport('rule')
+  // 有领域、有维度，但一个探针都没配上：这不是「没有缺口」，
+  // 而是「还没能力判断」。混为一谈会让用户以为这一项检查过了。
+  if (totalSlots === 0) return emptyReport('unprobed')
 
   gaps.sort((left, right) => {
     const bySeverity = SEVERITY_ORDER[left.severity] - SEVERITY_ORDER[right.severity]

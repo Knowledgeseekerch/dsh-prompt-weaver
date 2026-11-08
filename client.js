@@ -73,6 +73,7 @@ window.__ModuleLoader__.load({
       copyFailed: 'Copy failed.',
       assumptions: 'Assumptions',
       completeness: 'Unanswered requirements',
+      unprobed: 'No check rules for this domain yet, so nothing was measured.',
       coverage: 'coverage',
       mustSpecify: 'Must specify first',
       shouldSpecify: 'Should specify',
@@ -130,6 +131,7 @@ window.__ModuleLoader__.load({
       copyFailed: '复制失败。',
       assumptions: '模型补充的前提',
       completeness: '需求缺口',
+      unprobed: '该领域暂无检查规则，未做缺口判定。',
       coverage: '覆盖度',
       mustSpecify: '必须先定',
       shouldSpecify: '建议明确',
@@ -994,9 +996,13 @@ window.__ModuleLoader__.load({
       const report = result.completeness
       if (report === undefined || report === null) return null
       if (!Array.isArray(report.gaps) || report.gaps.length === 0) {
+        // 两种情况看着一样、含义完全不同：判定过且没缺口，和根本没有判定规则。
+        // 后者说成「没有必须补的缺口」是假阳性，会让用户以为检查过了。
+        const unprobed = report.source === 'unprobed'
         return h('div', { className: 'dsh-pw-card' },
           h('strong', null, t('completeness')),
-          h('div', { className: 'dsh-pw-ok' }, t('noGaps'))
+          h('div', { className: unprobed ? 'dsh-pw-muted' : 'dsh-pw-ok' },
+            unprobed ? t('unprobed') : t('noGaps'))
         )
       }
       const percent = Math.round((report.coverage ?? 0) * 100)

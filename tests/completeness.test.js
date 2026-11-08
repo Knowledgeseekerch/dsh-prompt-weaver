@@ -86,7 +86,8 @@ test('dimensions without a registered probe are not judged', () => {
     dimensions: [{ id: 'scope', zh: '检索范围', en: 'scope', slots: { zh: ['来源'], en: ['sources'] } }],
   }]
   const result = assessCompleteness({ draft: draftOf('帮我调研一下'), domains, locale: 'zh' })
-  assert.equal(result.source, 'rule')
+  // 没探针不等于没缺口：来源标成 unprobed，面板才不会显示「没有必须补的缺口」。
+  assert.equal(result.source, 'unprobed')
   assert.deepEqual(result.gaps, [])
   assert.equal(result.summary.totalSlots, 0)
 })

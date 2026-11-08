@@ -105,6 +105,9 @@ test('a software draft with no probes does not invent gaps', () => {
   // 没有探针就不该凭空造缺口，但仍然要按参数化规则办事。
   assert.equal(system.includes('block the definition'), false)
   assert.match(system, /could become an input of the deliverable/u)
+  // 也不能报成「没有缺口」：那是没判定，不是判定通过。
+  assert.equal(completeness.source, 'unprobed')
+  assert.equal(completeness.gaps.length, 0)
 })
 
 test('the general framework asks for defaults before it asks for questions', () => {

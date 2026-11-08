@@ -47,7 +47,7 @@ test('every entry yields a well-formed report and never throws', () => {
     assert.equal(report.schemaVersion, 1, row.id)
     assert.ok(Number.isInteger(report.summary.totalSlots), row.id)
     assert.ok(report.coverage >= 0 && report.coverage <= 1, row.id)
-    assert.ok(['rule', 'degraded'].includes(report.source), row.id)
+    assert.ok(['rule', 'degraded', 'unprobed'].includes(report.source), row.id)
     for (const gap of report.gaps) {
       assert.ok(['blocking', 'important', 'optional'].includes(gap.severity), row.id)
       assert.equal(typeof gap.question, 'string', row.id)
