@@ -33,6 +33,23 @@ export function resolveAdaptiveTimeout(config, draft) {
   return Math.min(configured, Math.max(20000, estimated))
 }
 
+/**
+ * 取消的形态并不统一：原生 AbortController、DOMException(code 20)、
+ * 以及各类 SDK 自己包装的 CanceledError / ERR_CANCELED。
+ * 只认 'AbortError' 会把其余形态报成 model-failed，用户看到的是「模型失败」，
+ * 而实际上是他自己按了取消。
+ */
+export function isAbortError(error) {
+  if (error === undefined || error === null) return false
+  const name = String(error.name ?? '')
+  if (name === 'AbortError' || name === 'CanceledError' || name === 'CancelledError') return true
+  const code = error.code
+  if (code === 'ABORT_ERR' || code === 'ERR_CANCELED' || code === 'ERR_ABORTED') return true
+  if (name === 'DOMException' && Number(code) === 20) return true
+  const message = typeof error.message === 'string' ? error.message.toLowerCase() : ''
+  return message.includes('operation was aborted') || message.includes('the operation was aborted')
+}
+
 export function createDshModelProvider({ ctx, config, session }) {
   return {
     id: 'dsh',
@@ -105,6 +122,9 @@ async function streamOnce({ llm, route, system, user, budget, config, signal, ti
   signal?.addEventListener('abort', forwardAbort, { once: true })
 
   let output = ''
+  // 收到过 finish 事件才算「模型说了自己讲完了」。流被掐断时迭代器同样会 done，
+  // 只凭 done 判断，会把半截响应当成完整结果写回草稿。
+  let sawFinish = false
   try {
     const stream = llm.stream({
       provider: route.provider,
@@ -145,6 +165,7 @@ async function streamOnce({ llm, route, system, user, budget, config, signal, ti
         armIdle('The model stalled before finishing.')
         if (event?.type === 'text-delta' && typeof event.text === 'string') output += event.text
         if (event?.type === 'finish') {
+          sawFinish = true
           // DSH 的正常结束 reason 是 "stop"；max-tokens 表示输出被截断。
           const kind = event.reason?.kind
           if (kind === 'max-tokens') {
@@ -170,7 +191,7 @@ async function streamOnce({ llm, route, system, user, budget, config, signal, ti
     }
   } catch (error) {
     if (error instanceof PromptWeaverError) throw error
-    if (error?.name === 'AbortError' || error?.code === 'ABORT_ERR') {
+    if (isAbortError(error)) {
       throw timeoutController.signal.reason ?? error
     }
     throw new PromptWeaverError('model-failed', error?.message ?? 'The model request failed.')
@@ -182,6 +203,14 @@ async function streamOnce({ llm, route, system, user, budget, config, signal, ti
 
   if (output.trim().length === 0) {
     throw new PromptWeaverError('model-failed', 'The model returned an empty response.')
+  }
+  // 有文本但没有结束事件：流在中途断了。这类半截结果语法上可能恰好完整，
+  // 但语义上不保证完整，静默写回等于拿用户的草稿赌一次截断。
+  if (!sawFinish) {
+    throw new PromptWeaverError(
+      'model-failed',
+      'The stream ended without a finish event; the response may have been cut off. Retry the enhancement.',
+    )
   }
   return { content: output, model: route }
 }
