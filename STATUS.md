@@ -8,10 +8,12 @@
 |---|---|
 | 源码 | `D:\AI\agent\2026-11-07-23-53-35\dsh-prompt-weaver` |
 | 本地安装方式 | junction：`~/.dsh/profiles/desktop/node_modules/dsh-prompt-weaver` 直连源码 |
-| 已发布版本 | `v0.3.2`（远端最新 tag） |
+| 已发布版本 | `v0.3.3`（远端最新 tag） |
 | 未发布提交 | 无 |
-| 测试 | 133 项全过 |
-| 静态检查 | `node scripts/check.mjs`（52 JS / 10 JSON）与 `scripts/lint.mjs`（84 文件）通过 |
+| 测试 | 141 项全过 |
+| 静态检查 | `node scripts/check.mjs`（54 JS / 10 JSON）与 `scripts/lint.mjs`（86 文件）通过 |
+
+**能力变更（0.3.3）**：五处，全部来自真实对照暴露的短板。① 前提复核 `premiseCheck`：草稿要做的事本身不成立时可标注，且明确「不算添加需求」——之前那版把「不重装软件」写进非目标，等于封死了唯一出路。② 诊断三步前置：现象落到标准名称（黑底英文重启提示=蓝屏）、排除性证据提到开头并说明排除了什么、点名证据位置（dump/事件 ID/日志路径）。③ 图标换成通电灯泡（固定黄色、20px 专用简化版）。④ 增强态不再有角向运动，改为灯丝升温 + 光晕跳动 + 光波向外扩散。⑤ 超时拆成两个时钟：`idleTimeoutMs`（默认 20s，有事件就重置）抓真卡死，`timeoutMs` 作硬顶并按草稿长度自适应，小配置不被抬高。
 
 **市场索引**：仓库根的 `market-index.json` 是给 DSH 官方「插件 → 发现 → 索引源」用的 format 1 索引，条目指向本仓库的 Git commit。索引 URL 走 gh-proxy 包装（raw 与 jsDelivr 在本机被重置），发版后要同步更新其中的 `version` 与 `commit`，否则市场显示的仍是旧版本。第三方 dshmarket 不读它——它只认 awesome-dsh-plugin 的精选目录。
 

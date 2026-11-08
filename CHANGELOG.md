@@ -4,6 +4,24 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2026-11-08
+
+Five changes, each one closing a gap a real side-by-side comparison exposed.
+
+### Added
+
+- The enhancer can report that the premise itself does not hold, without touching the task (`premiseCheck`). A draft asking to "move an installed app to a USB drive and keep it running" used to come back with "do not reinstall" written into its non-goals — the one workable alternative, forbidden. The prompt now ships unchanged in scope with a flagged premise beside it.
+
+### Changed
+
+- Diagnostic drafts get three pre-steps before any fix: name the phenomenon with its standard term (a black screen with English text and a restart prompt is a BugCheck), promote the excluding evidence ("the same happens in an empty document") to the front and say what it rules out, and name where the evidence lives (dump directory, event id, log path). "Send a screenshot" without naming the line that matters no longer counts as guidance.
+- The enhancer button is a lit bulb instead of a sparkle: fixed yellow rather than a theme colour, one glow layer, five rays, two base rings — drawn for 20px, because the full-detail version collapsed into a dot at that size.
+- The busy state no longer moves in an angular direction. It reads as a bulb warming up: the glass lifts from `#FFEB99` to near-white at the midpoint, the glow pulses faster than at rest, and a thin ring grows from the glass to 2.1× and fades out.
+
+### Fixed
+
+- `timeoutMs` was a single fixed deadline: a long request got killed, and a slow one died with it. There are now two clocks. `idleTimeoutMs` (default 20s) resets on every stream event and catches a genuine stall; `timeoutMs` remains a hard ceiling that adapts to draft length. A deliberately small `timeoutMs` is never raised, so fast-fail still works.
+
 ## [0.3.2] - 2026-11-08
 
 Five changes, all of them about not making the user do the tool's work.
