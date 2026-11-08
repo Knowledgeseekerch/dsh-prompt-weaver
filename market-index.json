@@ -1,0 +1,57 @@
+{
+  "format": 1,
+  "title": {
+    "en": "Knowledgeseekerch plugins",
+    "zh": "Knowledgeseekerch 插件"
+  },
+  "description": {
+    "en": "Plugins for DeepSeek Harness, published from the author's own repositories.",
+    "zh": "DeepSeek Harness 插件，来自作者自己的仓库。"
+  },
+  "metadata": {
+    "categories": {
+      "prompt": { "title": { "en": "Prompt tooling", "zh": "提示词工具" } }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-prompt-weaver",
+      "title": { "en": "Prompt Weaver", "zh": "提示词编织器" },
+      "description": {
+        "en": "Framework-aware prompt enhancement for DeepSeek Harness: fills the dimensions a task cannot be executed without, reports the gaps the draft still leaves open, and keeps every original constraint and protected item intact.",
+        "zh": "面向 DeepSeek Harness 的框架式提示词增强：补齐这类任务无法执行的必答维度，报出草稿仍留的缺口，并逐字保留原始约束与受保护项。"
+      },
+      "icon": "./icon.svg",
+      "author": "Knowledgeseekerch",
+      "homepage": "https://github.com/Knowledgeseekerch/dsh-prompt-weaver",
+      "repository": {
+        "url": "https://github.com/Knowledgeseekerch/dsh-prompt-weaver"
+      },
+      "metadata": {
+        "category": "prompt",
+        "keywords": [
+          "prompt",
+          "prompt-enhancement",
+          "提示词",
+          "提示词增强",
+          "dsh-plugin",
+          "framework"
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.3.1",
+          "publishTimestamp": 1794169274,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/Knowledgeseekerch/dsh-prompt-weaver",
+            "commit": "a87787ae3e7c9983cdad6a4e6bb39a3773c53043"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.5"
+          }
+        }
+      ]
+    }
+  ]
+}
