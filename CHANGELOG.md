@@ -4,6 +4,16 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] - 2026-11-08
+
+### Added
+
+- The one-click enhance can be cancelled: pressing the button again while a request is in flight aborts it through the same AbortSignal the provider already honours. Previously the only way out was to wait for three retries plus the timeout.
+
+### Changed
+
+- The composer button stays clickable while busy and its tooltip switches to Cancel, instead of being disabled with no way out.
+
 ## [0.2.5] - 2026-11-08
 
 ### Changed

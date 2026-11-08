@@ -677,6 +677,7 @@ window.__ModuleLoader__.load({
 
       const [busy, setBusy] = React.useState(false)
       const [pendingResult, setPendingResult] = React.useState(null)
+      const abortRef = React.useRef(null)
 
       // 一键增强：不弹面板，点一下就跑，结果直接写回输入框。
       // 右键按钮仍可打开完整面板（差异对比、迭代、导入导出）。
@@ -685,7 +686,14 @@ window.__ModuleLoader__.load({
           toastFn('error', t('unavailable'))
           return
         }
-        if (disabled || busy) return
+        // 进行中再点一次即取消：没有这个入口，用户只能等三次重试加超时。
+        if (busy) {
+          abortRef.current?.abort(new Error('cancelled by user'))
+          return
+        }
+        if (disabled) return
+        const controller = new AbortController()
+        abortRef.current = controller
         setBusy(true)
         try {
           // 模型输出有波动：同一句话可能这次过、下次不过。
@@ -706,7 +714,7 @@ window.__ModuleLoader__.load({
                     attachmentCount: requestBase.attachmentCount,
                   },
                 },
-              })
+              }, controller.signal)
               value = response?.value ?? response
             } catch {
               value = undefined
@@ -736,8 +744,9 @@ window.__ModuleLoader__.load({
           setOpen(true)
           toastFn('error', `${violations} violation(s), ${assumptions} assumption(s) - review before applying`)
         } catch {
-          toastFn('error', t('failed'))
+          toastFn('error', controller.signal.aborted ? 'Cancelled' : t('failed'))
         } finally {
+          if (abortRef.current === controller) abortRef.current = null
           setBusy(false)
         }
       }, [rpc, sessionId, draft, requestBase, disabled, busy, inputActions, t, toastFn])
@@ -757,8 +766,8 @@ window.__ModuleLoader__.load({
           type: 'button',
           className: busy ? 'dsh-pw-button is-busy' : 'dsh-pw-button',
           'aria-label': t('action'),
-          title: busy ? t('loading') : title,
-          disabled: disabled || busy,
+          title: busy ? 'Cancel' : title,
+          disabled,
           onMouseDown: event => event.preventDefault(),
           onClick: runDirect,
           onContextMenu: event => {
