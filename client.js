@@ -9,8 +9,8 @@ window.__ModuleLoader__.load({
     const LIST_ENDPOINT = 'promptWeaver/listFrameworks'
     const IMPORT_ENDPOINT = 'promptWeaver/importConfig'
     const EXPORT_ENDPOINT = 'promptWeaver/exportConfig'
-const TAKE_PENDING_ENDPOINT = 'promptWeaver/takePending'
-const CLEAR_PENDING_ENDPOINT = 'promptWeaver/clearPending'
+    const TAKE_PENDING_ENDPOINT = 'promptWeaver/takePending'
+    const CLEAR_PENDING_ENDPOINT = 'promptWeaver/clearPending'
     const MAX_HISTORY = 5
     const MAX_IMPORT_CHARS = 1024 * 1024
 
@@ -729,6 +729,7 @@ const CLEAR_PENDING_ENDPOINT = 'promptWeaver/clearPending'
           // 对非确定性失败自动重试，确定性失败立即返回。
           const deterministic = new Set(['sensitive-draft', 'command-only', 'too-long', 'invalid-value', 'unavailable', 'no-route'])
           let value
+          let lastError
           for (let attempt = 0; attempt < 3; attempt += 1) {
             try {
               const response = await rpc.call('/api', ENDPOINT, {
@@ -746,7 +747,8 @@ const CLEAR_PENDING_ENDPOINT = 'promptWeaver/clearPending'
                 },
               }, controller.signal)
               value = response?.value ?? response
-            } catch {
+            } catch (error) {
+              lastError = error
               value = undefined
             }
             if (value?.ok === true) break
@@ -756,7 +758,7 @@ const CLEAR_PENDING_ENDPOINT = 'promptWeaver/clearPending'
           if (value?.ok !== true) {
             const message = typeof value?.message === 'string' && value.message.length > 0
               ? value.message
-              : t('failed')
+              : (lastError?.message || t('failed'))
             const reason = typeof value?.reason === 'string' ? value.reason : undefined
             toastFn('error', reason === undefined ? message : `[${reason}] ${message}`)
             return

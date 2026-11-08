@@ -4,6 +4,16 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-11-08
+
+### Fixed
+
+- A failed one-click run showed only "the model could not enhance this draft" even when the request never reached the host, because the rpc rejection was swallowed. The rejection message is now surfaced, so the toast says what actually failed.
+
+### Changed
+
+- Minor indentation cleanup in the client endpoint constants.
+
 ## [0.2.9] - 2026-11-08
 
 ### Added
