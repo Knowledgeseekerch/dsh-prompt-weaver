@@ -115,3 +115,36 @@ test('context collector redacts assistant messages only when opted in', async ()
   assert.equal(context.conversationMessages, 2)
   assert.equal(context.conversation.some(message => message.role === 'assistant'), true)
 })
+
+test('PowerShell scripts are indexed as text files', async () => {
+  // TEXT_EXTENSIONS 里存的是带点的扩展名，写成 'ps1' 会让 .ps1 永远匹配不上、
+  // 整个脚本目录被当成二进制跳过。这条测试锁的就是那个点号。
+  const root = { targetKey: 'root', displayPath: '/repo' }
+  const scripts = { targetKey: 'scripts', displayPath: '/repo/scripts' }
+  const deploy = { targetKey: 'deploy', displayPath: '/repo/scripts/deploy.ps1' }
+  const fs = {
+    async resolve(path) {
+      if (path === '/repo') return root
+      if (path === '/repo/scripts') return scripts
+      throw new Error(`unexpected resolve ${path}`)
+    },
+    async listDir(target) {
+      if (target.targetKey === 'root') return [{ name: 'scripts', type: 'directory', target: scripts }]
+      return [{ name: 'deploy.ps1', type: 'file', target: deploy }]
+    },
+    async readText() {
+      return 'Write-Host "deploy"\n'
+    },
+  }
+  const config = readConfig({ context: { maxFiles: 5 } })
+  const draft = parseMixedDraft('tidy up scripts/deploy.ps1')
+  const context = await collectContext({
+    fs,
+    root: '/repo',
+    session: createSession(),
+    draft,
+    config,
+  })
+  assert.equal(context.files.length, 1)
+  assert.equal(context.files[0].path, '/repo/scripts/deploy.ps1')
+})

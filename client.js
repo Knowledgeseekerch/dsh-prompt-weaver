@@ -428,6 +428,15 @@ window.__ModuleLoader__.load({
         setView('enhanced')
         setFeedback('')
         setStatus({ kind: 'success' })
+        // 写回策略必须与一键增强一致：有违规就只把结果留在面板里，不落草稿。
+        // 否则用户改从面板走一遍，就能把丢了保护项/约束的结果直接盖进输入框，
+        // 而一键增强那条路径明明是拦着的——同一条插件不该有两套门禁。
+        if (!canApplyResult(value)) {
+          const message = `${value.violations?.length ?? 0} violation(s) - review before applying`
+          setStatus({ kind: 'error', message })
+          toast('error', message)
+          return
+        }
         // 结果直接写回输入框，然后面板收缩淡出，回落到会话。
         let applied = false
         if (typeof inputActions?.setDraft === 'function') {
@@ -803,7 +812,7 @@ window.__ModuleLoader__.load({
             toastFn('error', 'Session changed during enhancement; result discarded')
             return
           }
-          if (violations === 0 && typeof inputActions?.setDraft === 'function') {
+          if (canApplyResult(value) && typeof inputActions?.setDraft === 'function') {
             try {
               inputActions.setDraft(value.text)
             } catch (error) {
@@ -881,6 +890,13 @@ window.__ModuleLoader__.load({
       return match === null ? undefined : match[0]
     }
 
+    // 两条增强路径共用的写回门禁：只有零违规才允许自动落草稿。
+    // 定义成单点，免得下次又只在其中一条路径里拦住。
+    function canApplyResult(result) {
+      if (result === undefined || result === null) return false
+      return (result.violations?.length ?? 0) === 0
+    }
+
     function renderQuality(result, t) {
       const quality = result.quality
       if (quality === undefined) return null
@@ -889,9 +905,7 @@ window.__ModuleLoader__.load({
         h('div', { className: 'dsh-pw-muted' },
           `${t('score')}: ${quality.score}; ${t('compare')}: ${result.comparison?.delta?.score ?? 0}`),
         h('ul', null,
-          (quality.metrics?.retainedConstraintIds ?? []).length >= 0
-            ? h('li', null, `${t('constraints')}: ${quality.metrics?.constraintCount ?? 0}`)
-            : null,
+          h('li', null, `${t('constraints')}: ${quality.metrics?.constraintCount ?? 0}`),
           h('li', null, `${t('protected')}: ${quality.metrics?.retainedProtectedItemCount ?? 0}/${quality.metrics?.protectedItemCount ?? 0}`)
         ),
         quality.passed ? h('div', { className: 'dsh-pw-ok' }, 'OK') : h('div', { className: 'dsh-pw-error' }, t('failedGate'))
@@ -909,12 +923,27 @@ window.__ModuleLoader__.load({
       )
     }
 
+    // openQuestions 是 { question, reason } 的对象数组，直接 String() 会得到 [object Object]。
+    function openQuestionText(item) {
+      if (typeof item === 'string' && item.length > 0) return item
+      const question = typeof item?.question === 'string' ? item.question : ''
+      if (question.length === 0) return String(item)
+      return typeof item?.reason === 'string' && item.reason.length > 0 ? `${question} (${item.reason})` : question
+    }
+
     function renderAnalysis(result, t) {
       const analysis = result.analysis
       if (analysis === undefined) return null
+      const constraints = analysis.constraints ?? []
+      const openQuestions = result.openQuestions ?? []
       return h('div', { className: 'dsh-pw-card' },
         h('strong', null, `${t('framework')}: ${result.framework ?? '-'}; ${t('mode')}: ${result.mode ?? '-'}`),
-        h('div', { className: 'dsh-pw-muted' }, `${t('protected')}: ${result.analysis?.constraints?.length ?? 0}; ${t('openQuestions')}: ${result.openQuestions?.length ?? 0}`)
+        // 这里原先拿 constraints.length 顶替「受保护项」的数字，标签与数字对不上：
+        // 受保护项的留存率在质量卡里已有口径，这张卡只报约束数与待确认数。
+        h('div', { className: 'dsh-pw-muted' }, `${t('constraints')}: ${constraints.length}; ${t('openQuestions')}: ${openQuestions.length}`),
+        openQuestions.length === 0
+          ? null
+          : h('ul', null, openQuestions.map((item, index) => h('li', { key: index }, openQuestionText(item))))
       )
     }
 

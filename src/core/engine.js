@@ -256,9 +256,11 @@ export function createPromptWeaverEngine({
   }
 
   function pickOutputLocale(analysis, requested) {
+    // 显式请求优先：调用方明确指定输出语言就照办。
+    // 原先两条语言分支都先于 requested 返回，等于显式 locale 只在语言未知时才生效。
+    if (requested !== undefined) return requested
     if (analysis.language.primary === 'zh') return 'zh'
-    if (analysis.language.primary === 'en') return 'en'
-    return requested ?? (analysis.language.primary === 'unknown' ? 'en' : 'en')
+    return 'en'
   }
 
   function buildQualityInput({ draft, baseAnalysis, iteration }) {

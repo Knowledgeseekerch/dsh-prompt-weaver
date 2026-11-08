@@ -65,7 +65,9 @@ export function createHostService({ ctx, config, frameworkStore, engine, logger 
         if (request === null || typeof request !== 'object') {
           throw new PromptWeaverError('invalid-config-bundle', 'Import payload must be an object.')
         }
-        if (JSON.stringify(request).length > MAX_IMPORT_BYTES) {
+        // String.length 数的是 UTF-16 code unit，而错误文案按字节限额：
+        // 中文与 emoji 下两套口径差得不少，统一按 UTF-8 字节数判断。
+        if (new TextEncoder().encode(JSON.stringify(request)).length > MAX_IMPORT_BYTES) {
           throw new PromptWeaverError('import-too-large', `The configuration bundle exceeds the ${MAX_IMPORT_BYTES} byte limit.`)
         }
         const bundle = request.bundle === undefined ? request : request.bundle

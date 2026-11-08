@@ -9,7 +9,7 @@ const SENSITIVE_BASENAMES = /^(?:^|\.)(?:env|env\..*|.*\.pem|.*\.key|.*\.p12|.*\
 const TEXT_EXTENSIONS = new Set([
   '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.json', '.jsonc', '.yaml', '.yml', '.toml',
   '.md', '.mdx', '.txt', '.py', '.rb', '.go', '.rs', '.java', '.kt', '.swift', '.c', '.h',
-  '.cpp', '.hpp', '.cs', '.php', '.sh', '.bash', '.zsh', 'ps1', '.sql', '.css', '.scss', '.html',
+  '.cpp', '.hpp', '.cs', '.php', '.sh', '.bash', '.zsh', '.ps1', '.psm1', '.psd1', '.sql', '.css', '.scss', '.html',
 ])
 const KEY_BASENAMES = new Set(['agents.md', 'readme.md', 'package.json', 'pyproject.toml', 'cargo.toml', 'go.mod', 'pnpm-workspace.yaml'])
 const SOURCE_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.py', '.rb', '.go', '.rs', '.java', '.kt', '.swift', '.c', '.h', '.cpp', '.hpp', '.cs', '.php', '.sql'])
@@ -213,7 +213,9 @@ function contentText(content) {
 
 function scoreFile({ path, name, extension, draft, depth }) {
   const text = draft.originalText.toLowerCase()
-  const pathLower = path.toLowerCase()
+  // Windows 上 path 可能带反斜杠，而下面几条按 /src/ 这类形态做判断，
+  // 不归一化会让核心源文件在 Windows 项目里拿不到这档加分。
+  const pathLower = path.replace(/\\/gu, '/').toLowerCase()
   let score = 0
   if (draft.protectedItems.some(item => item.kind === 'file-reference' && (pathLower.includes(item.text.toLowerCase()) || item.text.toLowerCase().includes(pathLower)))) score += 80
   if (text.includes(pathLower)) score += 60

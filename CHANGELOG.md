@@ -4,6 +4,18 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.15] - 2026-11-08
+
+### Fixed
+
+- The result panel wrote the enhanced text into the draft even when the result carried violations, so reaching the same result through the panel bypassed the quality gate the one-click path already enforced. Both paths now share one `canApplyResult` predicate, and a gated result stays in the panel for the user to apply by hand.
+- `'.ps1'` was listed as `'ps1'` in the text-extension set, so PowerShell scripts were never indexed as context. `.psm1` and `.psd1` are recognised as well.
+- `scoreFile` compared raw paths against `/src/` prefixes, which never matched on Windows; backslashes are normalised before scoring.
+- The analysis card reported `constraints.length` under the protected-items label, so the number and the caption described different things. The card now reports the constraint count and renders each open question instead of a bare count.
+- `renderQuality` guarded a row with `length >= 0`, a condition that is always true.
+- An explicit `locale` was ignored whenever the draft language was detected as `zh` or `en`; the request now wins, with the draft language as the fallback.
+- The configuration-import size limit counted UTF-16 code units while its message promised bytes; it now measures UTF-8 bytes.
+
 ## [0.2.14] - 2026-11-08
 
 ### Added

@@ -8,10 +8,10 @@
 |---|---|
 | 源码 | `D:\AI\agent\2026-11-07-23-53-35\dsh-prompt-weaver` |
 | 本地安装方式 | junction：`~/.dsh/profiles/desktop/node_modules/dsh-prompt-weaver` 直连源码 |
-| 已发布版本 | `v0.2.14`（远端最新 tag） |
-| 未发布提交 | 无（`4566641` 已随 0.2.14 发出） |
-| 测试 | 87 项全过 |
-| 静态检查 | `node scripts/check.mjs` 通过 |
+| 已发布版本 | `v0.2.15`（远端最新 tag） |
+| 未发布提交 | 无 |
+| 测试 | 90 项全过 |
+| 静态检查 | `node scripts/check.mjs` 与 `scripts/lint.mjs` 通过 |
 
 **本地生效方式**：改完源码 → **完整重启 DSH**（刷新页面不够，宿主侧代码不会重载）。
 
@@ -52,6 +52,11 @@
 | 结果无法单独取用 | `client.js` | 只能手动全选再粘，已加复制按钮（0.2.14） |
 | 补充的前提不可见 | `client.js` | 面板只报个数，改为逐条列出（0.2.14） |
 | 对比视图只能比头尾 | `client.js` | 中间改动一律看不见，改为 LCS 对齐、超长退化（0.2.14） |
+| 面板写回绕过门禁 | `client.js` | 面板路径不看 `violations` 直接落草稿，已统一 `canApplyResult`（0.2.15） |
+| `.ps1` 不被当文本 | `context.js` | 扩展名漏了点号，PowerShell 脚本永远进不了上下文（0.2.15） |
+| Windows 路径不加分 | `context.js` | 反斜杠路径匹配不上 `/src/`，评分前先归一化（0.2.15） |
+| 分析卡标签错位 | `client.js` | 「受保护项」显示的是约束数，改为约束数 + 待确认逐条（0.2.15） |
+| 显式 locale 被忽略 | `engine.js` | 语言分支先于 `requested` 返回，改为请求优先（0.2.15） |
 
 ## 四、已知未修（按优先级）
 
@@ -62,14 +67,18 @@
 | **并发双会话** | 单元测试只证明作用域隔离，没有真实双会话实测 |
 | **取消** | 代码已接 AbortSignal，未实测 |
 | **跨会话取回** | 代码已完成，未实测 |
+| **0.2.15 的界面改动** | 写回门禁、分析卡、待确认列表均未在真实 DSH 里看过 |
 
 ### P1 · 未实现
 
 | 项 | 位置 | 说明 |
 |---|---|---|
-| locale 双源 | `client.js` / `locale/*.json` | 内联字典与 JSON 文件两套 |
-| CLI 预算 | `bin/` | 未复用 `context.js` 的预算逻辑 |
-| `timeoutMs` 语义 | `provider.js` | 只覆盖模型调用，不覆盖 context 扫描 |
+| context 总预算 | `context.js` | `maxTotalBytes` 只裁 files，tree + conversation 可超总预算 |
+| provider 完成事件 | `provider.js` | 流异常结束但已有文本时，仍可能被当成完整结果 |
+| abort 识别 | `provider.js` | 只认 `AbortError`/`ABORT_ERR`，其他形态会报成 model-failed |
+| locale 双源 | `client.js` / `locale/*.json` | 内联字典与 JSON 文件两套，新增 key 未同步 |
+| CLI 预算 | `bin/` | 未复用 `context.js` 的预算与脱敏，且同文件脱敏跑了两遍 |
+| `timeoutMs` 语义 | `provider.js` | 只覆盖模型调用，不覆盖 context 扫描（文档需同步） |
 | Windows CI | `.github/workflows/ci.yml` | 只有 ubuntu |
 
 ### P2 · 质量层
@@ -82,15 +91,18 @@
 
 ## 五、待攒的改动（目标 5 处发下一版）
 
-`0.2.14` 已一次性消耗 4 处：`sessionIdRef` 修复、复制按钮、`assumptions` 展示、LCS diff。
+`0.2.14` 消耗 4 处：`sessionIdRef` 修复、复制按钮、`assumptions` 展示、LCS diff。
 
-剩余候选，攒满 5 处发 `0.2.15`：
+`0.2.15` 消耗 8 处：写回门禁统一、`.ps1` 扩展名、Windows 路径归一化、分析卡标签错位、待确认逐条展示、`renderQuality` 恒真条件、显式 locale 优先、导入限额改字节。
+
+剩余候选，攒满 5 处发下一版：
 
 1. locale 单源化（内联字典与 `locale/*.json` 两套）
-2. CLI 预算对齐 host 侧 `context.js`
-3. `timeoutMs` 覆盖 context 扫描
-4. 49 条语料的可自动判定断言
-5. Windows CI
+2. CLI 预算对齐 host 侧 `context.js`（含同文件重复脱敏）
+3. context 总预算（tree + conversation 也受 `maxTotalBytes` 约束）
+4. provider 完成事件与 abort 形态识别
+5. 49 条语料的可自动判定断言
+6. Windows CI
 
 清单外的改动照常可以进版，只是不占这 5 个名额。
 
@@ -98,8 +110,9 @@
 
 ```powershell
 cd D:\AI\agent\2026-11-07-23-53-35\dsh-prompt-weaver
-node --test "tests/*.test.js"      # 期望 pass 87 / fail 0
-node scripts/check.mjs             # 期望 check ok
+node --test "tests/*.test.js"      # 期望 pass 90 / fail 0
+node scripts/check.mjs             # 期望 check ok: 44 JS / 11 JSON
+node scripts/lint.mjs              # 期望 lint ok: 77 file(s)
 ```
 
 界面层（重启后）：
@@ -110,6 +123,7 @@ node scripts/check.mjs             # 期望 check ok
 | `打开抖音并点赞` | 五节结构（目标/实现方式/步骤/成功判定/异常处理），结果写回 |
 | `这个模型是谁提供的` | 一个更精确的问句，无【待确认】清单 |
 | `帮我写个 C++ 控制舵机的程序` | code 框架，写回输入框 |
+| 面板里点增强、结果带违规 | 不写回、不自动关面板，状态栏报 `N violation(s)` |
 
 ## 七、关键约定
 
