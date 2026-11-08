@@ -6,17 +6,19 @@ export const BUILTIN_FRAMEWORKS = freezeDeep([
     id: 'general',
     name: { zh: '通用结构', en: 'General structure' },
     description: {
-      zh: '适合大多数任务：目标、上下文、约束、待确认问题、输出与验证。',
-      en: 'Suitable for most tasks: goal, context, constraints, open questions, output, and validation.',
+      zh: '适合大多数任务：目标、上下文、约束、假设与默认值、输出与验证。',
+      en: 'Suitable for most tasks: goal, context, constraints, assumptions and defaults, output, and validation.',
     },
     taskTypes: ['general'],
     sections: [
       section('goal', '目标', 'Goal', '用户要完成的一件事；只重述已有意图，不添加新需求。', 'The one thing the user wants; restate the existing intent only and add no new requirements.'),
       section('context', '上下文', 'Context', '仅使用草稿和参考材料中出现的信息。', 'Use only information present in the draft and reference material.'),
       section('constraints', '约束', 'Constraints', '逐条保留用户原有约束；没有就省略本节。', 'Preserve each user constraint verbatim; omit this section if none exist.'),
-      section('open-questions', '待确认', 'Open questions', '只列出影响执行的缺失信息，最多 3 条；不假设答案，不用反问替代回答。', 'List at most three missing details that affect execution; do not invent answers, and never replace an answer with counter-questions.'),
+      // 这一节以前叫「待确认」，逼着模型去找没定的事。现在先写默认值：
+      // 能让任务开工的默认值远比一串待确认有用，需要用户拍板的才留下。
+      section('open-questions', '假设与默认值', 'Assumptions and defaults', '先写为了让任务能开始而采用的默认值，每条标明可被覆盖；只有当某项缺失会让任务完全无法表述时才写成问题，最多 3 条。', 'First state the defaults adopted so the task can start, each marked as overridable. Only a value without which the task cannot be stated at all belongs here as a question, at most three.'),
       section('output', '输出', 'Output', '描述用户明确要求的交付物或回复形态。', 'Describe the deliverable or response form explicitly requested by the user.'),
-      section('validation', '验证', 'Validation', '只写用户已有的验证方式；缺失时列入待确认。', 'Include only verification the user already provided; otherwise move it to open questions.'),
+      section('validation', '验证', 'Validation', '必须给出可执行的验证：命令、断言或退出码；用户没给时按这类任务的惯例给默认方案，不要推回待确认。', 'Always give an executable check: a command, an assertion, or an exit code. When the user supplied none, propose the conventional one instead of deferring it.'),
     ],
   },
   {

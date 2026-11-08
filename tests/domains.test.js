@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { analyzeDraft } from '../src/core/analyze.js'
+import { BUILTIN_FRAMEWORKS } from '../src/core/builtins.js'
 import { assessCompleteness } from '../src/core/completeness.js'
 import { describeDimensions, detectDomains } from '../src/core/domains.js'
 import { parseMixedDraft } from '../src/core/draft.js'
@@ -89,8 +90,7 @@ test('blocking gaps are confirmed, the rest become parameters with defaults', ()
   assert.match(system, /at most three items/u)
 })
 
-test('a software draft with no probes does not invent gaps', () => {
-  const text = '帮我写个 Python 脚本批量缩图'
+test('a software draft with no probes does not invent gaps', () => {  const text = '帮我写个 Python 脚本批量缩图'
   const domains = detectDomains(text)
   const completeness = assessCompleteness({ draft: { originalText: text }, domains, locale: 'zh' })
   const system = buildSystemPrompt({
@@ -104,4 +104,19 @@ test('a software draft with no probes does not invent gaps', () => {
   // 没有探针就不该凭空造缺口，但仍然要按参数化规则办事。
   assert.equal(system.includes('block the definition'), false)
   assert.match(system, /could become an input of the deliverable/u)
+})
+
+test('the general framework asks for defaults before it asks for questions', () => {
+  const general = BUILTIN_FRAMEWORKS.find(framework => framework.id === 'general')
+  assert.ok(general !== undefined)
+
+  // 以前验证一节写着「缺失时列入待确认」，等于逼模型产出一段待确认。
+  const validation = general.sections.find(section => section.id === 'validation')
+  assert.match(validation.guidance.en, /executable check/u)
+  assert.equal(/move it to open questions/u.test(validation.guidance.en), false)
+
+  // 待确认那一节改成先写默认值，问题只是兜底。
+  const questions = general.sections.find(section => section.id === 'open-questions')
+  assert.match(questions.guidance.en, /defaults adopted/u)
+  assert.match(questions.guidance.en, /at most three/u)
 })
