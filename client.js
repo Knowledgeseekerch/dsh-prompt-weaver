@@ -304,6 +304,14 @@ window.__ModuleLoader__.load({
       resultRef.current = result
       const mountedRef = React.useRef(true)
       const abortRef = React.useRef(null)
+      const sessionIdRef = React.useRef(sessionId)
+      sessionIdRef.current = sessionId
+
+      // 切换会话时重置进行态：旧请求的结果不再属于当前输入框。
+      React.useEffect(() => {
+        setBusy(false)
+        abortRef.current = null
+      }, [sessionId])
       const fileInputRef = React.useRef(null)
 
       React.useEffect(() => {
@@ -694,6 +702,7 @@ window.__ModuleLoader__.load({
         }
         if (disabled) return
         const controller = new AbortController()
+        const sessionAtStart = sessionId
         abortRef.current = controller
         setBusy(true)
         try {
@@ -737,6 +746,11 @@ window.__ModuleLoader__.load({
           const score = value.quality?.score
           // 只有违规（丢了保护项、语言变了、臆造引用等）才阻止写回；
           // 假设只是模型补充的前提，随 toast 提示即可，不该打断一键流程。
+          // 期间切换过会话：结果属于旧会话，不能写进当前输入框。
+          if (sessionAtStart !== sessionIdRef.current) {
+            toastFn('error', 'Session changed during enhancement; result discarded')
+            return
+          }
           if (violations === 0 && typeof inputActions?.setDraft === 'function') {
             inputActions.setDraft(value.text)
             const scoreText = score === undefined ? '' : ` (${t('score')}: ${score})`

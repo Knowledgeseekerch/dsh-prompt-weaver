@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.8] - 2026-11-08
+
+### Fixed
+
+- Switching sessions while an enhancement was running could write the result into the newly focused session's composer, or lose it silently when the old composer unmounted. The request now records the originating session and discards the result if the session changed, with a toast explaining why.
+- The busy state and abort handle are reset when the session changes, so the button no longer stays in its loading state after a switch.
+
+### Known limitation
+
+- Two sessions cannot enhance at the same time: the button lives inside a per-session composer, so leaving a session unmounts it and the in-flight result has nowhere to go. Results are not persisted host-side yet.
+
 ## [0.2.7] - 2026-11-08
 
 ### Fixed
