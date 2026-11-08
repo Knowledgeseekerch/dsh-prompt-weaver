@@ -19,10 +19,24 @@ export function resolveInitialBudget(config, user) {
   return Math.min(Math.max(configured, estimated), cap)
 }
 
+/**
+ * 总时限自适应：配置值是硬顶，自适应只在顶之下伸缩。
+ * - 短草稿：按 20s 起步，比配置更快失败，用户不必干等；
+ * - 长草稿：按字数放宽，最多用满配置值；
+ * - 配置设得很小（想快速失败）时，自适应不会超过它。
+ * 真正的兜底交给 idleTimeoutMs：慢但在推进的任务不会被误杀。
+ */
+export function resolveAdaptiveTimeout(config, draft) {
+  const chars = typeof draft?.originalText === 'string' ? draft.originalText.length : 0
+  const estimated = 20000 + chars * 60
+  const configured = Number.isFinite(config.timeoutMs) ? config.timeoutMs : 45000
+  return Math.min(configured, Math.max(20000, estimated))
+}
+
 export function createDshModelProvider({ ctx, config, session }) {
   return {
     id: 'dsh',
-    async complete({ system, user, signal }) {
+    async complete({ system, user, draft, signal }) {
       assertAbort(signal)
       const llm = ctx.get('llm')
       if (llm === undefined || typeof llm.stream !== 'function') {
@@ -34,8 +48,8 @@ export function createDshModelProvider({ ctx, config, session }) {
       }
 
       const cap = capOf(config)
-      // timeoutMs 是「本次增强的总时限」：重试共用同一个 deadline，而不是每轮重新计时。
-      const deadline = Date.now() + config.timeoutMs
+      // 总时限自适应；重试仍共用同一个 deadline，不每轮重新计时。
+      const deadline = Date.now() + resolveAdaptiveTimeout(config, draft)
       let budget = resolveInitialBudget(config, user)
 
       for (;;) {
@@ -66,11 +80,23 @@ export function createDshModelProvider({ ctx, config, session }) {
 
 async function streamOnce({ llm, route, system, user, budget, config, signal, timeoutMs }) {
   const timeoutController = new AbortController()
-  const timer = setTimeout(() => {
-    const error = new PromptWeaverError('timeout', 'The model request timed out.')
+  const abortWith = (message) => {
+    const error = new PromptWeaverError('timeout', message)
     error.code = 'timeout'
     timeoutController.abort(error)
-  }, timeoutMs)
+  }
+  // 两个计时器，各管一件事，缺一不可：
+  // 1) 总截止：不重置，兜住「一直在推进但总时长离谱」的情况；
+  // 2) 空闲：每次有进展就重置，卡住时比总截止更早断。
+  // 只留总截止 → 慢一点的合法请求会被误杀；只留空闲 → 总时长失去上限。
+  const deadlineTimer = setTimeout(() => abortWith('The enhancement exceeded its total timeout.'), timeoutMs)
+  const idleMs = Math.max(200, Math.min(config.idleTimeoutMs ?? 20000, timeoutMs))
+  let idleTimer = null
+  const armIdle = (message) => {
+    if (idleTimer !== null) clearTimeout(idleTimer)
+    idleTimer = setTimeout(() => abortWith(message), idleMs)
+  }
+  armIdle('The model did not start responding in time.')
   const forwardAbort = () => {
     const error = new PromptWeaverError('aborted', 'The request was cancelled.')
     error.name = 'AbortError'
@@ -115,6 +141,8 @@ async function streamOnce({ llm, route, system, user, budget, config, signal, ti
           break
         }
         const event = next.value
+        // 有任何事件到达就说明还在推进，重置空闲计时。
+        armIdle('The model stalled before finishing.')
         if (event?.type === 'text-delta' && typeof event.text === 'string') output += event.text
         if (event?.type === 'finish') {
           // DSH 的正常结束 reason 是 "stop"；max-tokens 表示输出被截断。
@@ -147,7 +175,8 @@ async function streamOnce({ llm, route, system, user, budget, config, signal, ti
     }
     throw new PromptWeaverError('model-failed', error?.message ?? 'The model request failed.')
   } finally {
-    clearTimeout(timer)
+    clearTimeout(deadlineTimer)
+    if (idleTimer !== null) clearTimeout(idleTimer)
     signal?.removeEventListener('abort', forwardAbort)
   }
 

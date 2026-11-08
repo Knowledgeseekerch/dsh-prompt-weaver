@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { createDshModelProvider, resolveInitialBudget } from '../src/core/provider.js'
+import { createDshModelProvider, resolveAdaptiveTimeout, resolveInitialBudget } from '../src/core/provider.js'
 
 /** 可配置 mock：每一步描述一次 stream 的行为。 */
 function harness(script, overrides = {}) {
@@ -77,4 +77,23 @@ test('total timeout 是整次增强的共享时限，不会每轮重算', async 
   const elapsed = Date.now() - started
   assert.ok(elapsed < 200, `总耗时应受 90ms 约束，实际 ${elapsed}ms`)
   assert.ok(calls.length >= 1)
+})
+
+test('idleTimeoutMs 会先于总时限打断卡死的请求', async () => {
+  // 模型永不返回任何事件：总时限 5s，空闲 250ms，应当在 1s 内就断。
+  const { provider } = harness([{ kind: 'hang' }], { timeoutMs: 5000, idleTimeoutMs: 250 })
+  const started = Date.now()
+  await assert.rejects(() => provider.complete({ system: 's', user: 'u' }), /did not start responding/u)
+  const elapsed = Date.now() - started
+  assert.ok(elapsed < 1500, `空闲超时应当早于总时限，实际 ${elapsed}ms`)
+})
+
+test('自适应时限：短草稿低于配置硬顶，长草稿用满硬顶，小配置不被抬高', () => {
+  // 短草稿：配置 180s，但只给 ~20s，快速失败不干等。
+  const generous = { timeoutMs: 180000 }
+  assert.ok(resolveAdaptiveTimeout(generous, { originalText: '短草稿' }) < 60000)
+  // 长草稿：按字数放宽，上限就是配置值。
+  assert.equal(resolveAdaptiveTimeout(generous, { originalText: '字'.repeat(3000) }), 180000)
+  // 配置设得很小（想快速失败）时，自适应不得把它抬高。
+  assert.equal(resolveAdaptiveTimeout({ timeoutMs: 90 }, { originalText: '字'.repeat(3000) }), 90)
 })
