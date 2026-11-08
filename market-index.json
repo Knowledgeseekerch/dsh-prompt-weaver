@@ -48,12 +48,12 @@
       },
       "versions": [
         {
-          "version": "0.3.2",
-          "publishTimestamp": 1794141625,
+          "version": "0.3.3",
+          "publishTimestamp": 1794144623,
           "source": {
             "type": "git",
             "url": "https://github.com/Knowledgeseekerch/dsh-prompt-weaver",
-            "commit": "fce5277edbad987a84f231386e9a80e633290a55"
+            "commit": "844bd4ff49c1befab73819dd16309ed543c471f1"
           },
           "engines": {
             "dsh": ">=0.2.1-rc.5"
