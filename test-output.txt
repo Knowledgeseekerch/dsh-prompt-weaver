@@ -1,0 +1,484 @@
+TAP version 13
+# Subtest: classifies "打开抖音并点赞" as automation
+ok 1 - classifies "打开抖音并点赞" as automation
+  ---
+  duration_ms: 1.339
+  type: 'test'
+  ...
+# Subtest: classifies "如何打开抖音并点赞" as automation
+ok 2 - classifies "如何打开抖音并点赞" as automation
+  ---
+  duration_ms: 0.2587
+  type: 'test'
+  ...
+# Subtest: classifies "打开设置页面并点击导出" as automation
+ok 3 - classifies "打开设置页面并点击导出" as automation
+  ---
+  duration_ms: 0.0579
+  type: 'test'
+  ...
+# Subtest: classifies "导出接口文档" as automation
+ok 4 - classifies "导出接口文档" as automation
+  ---
+  duration_ms: 0.0522
+  type: 'test'
+  ...
+# Subtest: classifies "Open settings and click Export" as automation
+ok 5 - classifies "Open settings and click Export" as automation
+  ---
+  duration_ms: 0.2468
+  type: 'test'
+  ...
+# Subtest: classifies "请帮我实现登录功能" as code
+ok 6 - classifies "请帮我实现登录功能" as code
+  ---
+  duration_ms: 0.3501
+  type: 'test'
+  ...
+# Subtest: classifies "This is important" as general
+ok 7 - classifies "This is important" as general
+  ---
+  duration_ms: 0.1644
+  type: 'test'
+  ...
+# Subtest: classifies "Wholesale prices are rising" as general
+ok 8 - classifies "Wholesale prices are rising" as general
+  ---
+  duration_ms: 0.0793
+  type: 'test'
+  ...
+# Subtest: classifies "open prefix editor" as automation
+ok 9 - classifies "open prefix editor" as automation
+  ---
+  duration_ms: 0.2013
+  type: 'test'
+  ...
+# Subtest: classifies "什么是 DeepSeek Harness？" as question
+ok 10 - classifies "什么是 DeepSeek Harness？" as question
+  ---
+  duration_ms: 0.4401
+  type: 'test'
+  ...
+# Subtest: classifies "Who maintains this?" as question
+ok 11 - classifies "Who maintains this?" as question
+  ---
+  duration_ms: 0.1496
+  type: 'test'
+  ...
+# Subtest: looksLikeOperation requires an operation verb and no build verb
+ok 12 - looksLikeOperation requires an operation verb and no build verb
+  ---
+  duration_ms: 0.086
+  type: 'test'
+  ...
+# Subtest: looksLikeQuestion excludes request and build phrasing
+ok 13 - looksLikeQuestion excludes request and build phrasing
+  ---
+  duration_ms: 0.1824
+  type: 'test'
+  ...
+# Subtest: length boundaries: empty is not a question, 300 chars allowed, 301 rejected
+ok 14 - length boundaries: empty is not a question, 300 chars allowed, 301 rejected
+  ---
+  duration_ms: 0.0557
+  type: 'test'
+  ...
+# Subtest: known limitation: 怎么做页面 stays a question
+ok 15 - known limitation: 怎么做页面 stays a question
+  ---
+  duration_ms: 0.0374
+  type: 'test'
+  ...
+# Subtest: CLI enhance runs offline and emits JSON
+ok 16 - CLI enhance runs offline and emits JSON
+  ---
+  duration_ms: 174.0609
+  type: 'test'
+  ...
+# Subtest: CLI frameworks validate accepts bundled examples
+ok 17 - CLI frameworks validate accepts bundled examples
+  ---
+  duration_ms: 203.9052
+  type: 'test'
+  ...
+# Subtest: CLI config export contains preferences and custom frameworks
+ok 18 - CLI config export contains preferences and custom frameworks
+  ---
+  duration_ms: 158.8686
+  type: 'test'
+  ...
+# Subtest: CLI blocks sensitive drafts without echoing the secret
+ok 19 - CLI blocks sensitive drafts without echoing the secret
+  ---
+  duration_ms: 145.2933
+  type: 'test'
+  ...
+# Subtest: CLI compare prints a deterministic report
+ok 20 - CLI compare prints a deterministic report
+  ---
+  duration_ms: 154.9893
+  type: 'test'
+  ...
+# Subtest: client registers the composer slot and public RPC endpoints
+ok 21 - client registers the composer slot and public RPC endpoints
+  ---
+  duration_ms: 0.9266
+  type: 'test'
+  ...
+# Subtest: client preserves attachments and slash-command input instead of rejecting it
+ok 22 - client preserves attachments and slash-command input instead of rejecting it
+  ---
+  duration_ms: 0.6046
+  type: 'test'
+  ...
+# Subtest: client does not auto-submit or persist prompt text
+ok 23 - client does not auto-submit or persist prompt text
+  ---
+  duration_ms: 0.1497
+  type: 'test'
+  ...
+# Subtest: default config is frozen and valid
+ok 24 - default config is frozen and valid
+  ---
+  duration_ms: 1.0407
+  type: 'test'
+  ...
+# Subtest: config rejects unknown keys and out-of-range values
+ok 25 - config rejects unknown keys and out-of-range values
+  ---
+  duration_ms: 1.0631
+  type: 'test'
+  ...
+# Subtest: built-in frameworks remain frozen and registerable IDs are validated
+ok 26 - built-in frameworks remain frozen and registerable IDs are validated
+  ---
+  duration_ms: 1.2513
+  type: 'test'
+  ...
+# Subtest: custom frameworks register, select, and export
+ok 27 - custom frameworks register, select, and export
+  ---
+  duration_ms: 0.4817
+  type: 'test'
+  ...
+# Subtest: framework import conflict policies work
+ok 28 - framework import conflict policies work
+  ---
+  duration_ms: 1.376
+  type: 'test'
+  ...
+# Subtest: framework validation rejects malformed custom sections
+ok 29 - framework validation rejects malformed custom sections
+  ---
+  duration_ms: 0.2342
+  type: 'test'
+  ...
+# Subtest: configuration export contains only preferences and custom frameworks
+ok 30 - configuration export contains only preferences and custom frameworks
+  ---
+  duration_ms: 2.0285
+  type: 'test'
+  ...
+# Subtest: configuration import validates and applies conflict policy
+ok 31 - configuration import validates and applies conflict policy
+  ---
+  duration_ms: 1.2698
+  type: 'test'
+  ...
+# Subtest: configuration import rejects malformed bundles
+ok 32 - configuration import rejects malformed bundles
+  ---
+  duration_ms: 0.3571
+  type: 'test'
+  ...
+# Subtest: context collector selects grounded files and redacts secrets
+ok 33 - context collector selects grounded files and redacts secrets
+  ---
+  duration_ms: 5.1983
+  type: 'test'
+  ...
+# Subtest: context collector degrades when fs is unavailable
+ok 34 - context collector degrades when fs is unavailable
+  ---
+  duration_ms: 0.6768
+  type: 'test'
+  ...
+# Subtest: context collector redacts assistant messages only when opted in
+ok 35 - context collector redacts assistant messages only when opted in
+  ---
+  duration_ms: 0.4215
+  type: 'test'
+  ...
+# Subtest: mixed draft preserves slash command, file references, URLs, and versions
+ok 36 - mixed draft preserves slash command, file references, URLs, and versions
+  ---
+  duration_ms: 3.2324
+  type: 'test'
+  ...
+# Subtest: command-only draft is detected
+ok 37 - command-only draft is detected
+  ---
+  duration_ms: 0.2015
+  type: 'test'
+  ...
+# Subtest: explicit occurrences are trusted only when they match text
+ok 38 - explicit occurrences are trusted only when they match text
+  ---
+  duration_ms: 0.2934
+  type: 'test'
+  ...
+# Subtest: language detection distinguishes Chinese and English prose
+ok 39 - language detection distinguishes Chinese and English prose
+  ---
+  duration_ms: 0.4359
+  type: 'test'
+  ...
+# Subtest: constraints are extracted with original anchors
+ok 40 - constraints are extracted with original anchors
+  ---
+  duration_ms: 0.453
+  type: 'test'
+  ...
+# Subtest: analysis includes ambiguity heuristics without inventing answers
+ok 41 - analysis includes ambiguity heuristics without inventing answers
+  ---
+  duration_ms: 2.8477
+  type: 'test'
+  ...
+# Subtest: mixed engineering prompt is not classified as general
+ok 42 - mixed engineering prompt is not classified as general
+  ---
+  duration_ms: 0.8105
+  type: 'test'
+  ...
+# Subtest: local engine enhances mixed draft and preserves protected items
+ok 43 - local engine enhances mixed draft and preserves protected items
+  ---
+  duration_ms: 10.284
+  type: 'test'
+  ...
+# Subtest: engine rejects command-only draft instead of silently failing
+ok 44 - engine rejects command-only draft instead of silently failing
+  ---
+  duration_ms: 0.9497
+  type: 'test'
+  ...
+# Subtest: engine blocks high-confidence secrets by default
+ok 45 - engine blocks high-confidence secrets by default
+  ---
+  duration_ms: 0.6946
+  type: 'test'
+  ...
+# Subtest: engine enforces draft length before calling the model
+ok 46 - engine enforces draft length before calling the model
+  ---
+  duration_ms: 0.405
+  type: 'test'
+  ...
+# Subtest: engine rejects model output that adds unverified assumptions
+ok 47 - engine rejects model output that adds unverified assumptions
+  ---
+  duration_ms: 1.0642
+  type: 'test'
+  ...
+# Subtest: engine rejects output that loses the slash command or references
+ok 48 - engine rejects output that loses the slash command or references
+  ---
+  duration_ms: 0.6006
+  type: 'test'
+  ...
+# Subtest: engine supports explicit framework selection
+ok 49 - engine supports explicit framework selection
+  ---
+  duration_ms: 0.9929
+  type: 'test'
+  ...
+# Subtest: engine supports bounded iteration with feedback as a constraint
+ok 50 - engine supports bounded iteration with feedback as a constraint
+  ---
+  duration_ms: 0.8168
+  type: 'test'
+  ...
+# Subtest: engine rejects iteration beyond configured maximum
+ok 51 - engine rejects iteration beyond configured maximum
+  ---
+  duration_ms: 0.5535
+  type: 'test'
+  ...
+# Subtest: host plugin registers the service and Remote descriptor
+ok 52 - host plugin registers the service and Remote descriptor
+  ---
+  duration_ms: 1.8408
+  type: 'test'
+  ...
+# Subtest: host service enhances a mixed draft through the DSH llm seam
+ok 53 - host service enhances a mixed draft through the DSH llm seam
+  ---
+  duration_ms: 14.2969
+  type: 'test'
+  ...
+# Subtest: host service reports command-only drafts as a readable failure
+ok 54 - host service reports command-only drafts as a readable failure
+  ---
+  duration_ms: 1.2831
+  type: 'test'
+  ...
+# Subtest: host service lists frameworks and round-trips configuration
+ok 55 - host service lists frameworks and round-trips configuration
+  ---
+  duration_ms: 7.0209
+  type: 'test'
+  ...
+# Subtest: typert descriptor declares cancellation and direct invocations
+ok 56 - typert descriptor declares cancellation and direct invocations
+  ---
+  duration_ms: 0.104
+  type: 'test'
+  ...
+# Subtest: redaction masks credential assignments without exposing the secret
+ok 57 - redaction masks credential assignments without exposing the secret
+  ---
+  duration_ms: 1.4198
+  type: 'test'
+  ...
+# Subtest: private keys and cloud access keys are detected
+ok 58 - private keys and cloud access keys are detected
+  ---
+  duration_ms: 0.7084
+  type: 'test'
+  ...
+# Subtest: scanner reports offsets only
+ok 59 - scanner reports offsets only
+  ---
+  duration_ms: 0.1156
+  type: 'test'
+  ...
+# Subtest: resolveInitialBudget: config is a floor,估算可抬高，上限 16000
+ok 60 - resolveInitialBudget: config is a floor,估算可抬高，上限 16000
+  ---
+  duration_ms: 1.2655
+  type: 'test'
+  ...
+# Subtest: 一次 stop 只调用一次
+ok 61 - 一次 stop 只调用一次
+  ---
+  duration_ms: 1.045
+  type: 'test'
+  ...
+# Subtest: max-tokens 后用更大预算重试并成功
+ok 62 - max-tokens 后用更大预算重试并成功
+  ---
+  duration_ms: 0.7304
+  type: 'test'
+  ...
+# Subtest: 连续截断必须真的用满 16000 才报错
+ok 63 - 连续截断必须真的用满 16000 才报错
+  ---
+  duration_ms: 1.034
+  type: 'test'
+  ...
+# Subtest: 非截断错误不重试
+ok 64 - 非截断错误不重试
+  ---
+  duration_ms: 0.3799
+  type: 'test'
+  ...
+# Subtest: tool-calls 映射为可读错误且不重试
+ok 65 - tool-calls 映射为可读错误且不重试
+  ---
+  duration_ms: 0.2969
+  type: 'test'
+  ...
+# Subtest: 取消后不再发起下一轮
+ok 66 - 取消后不再发起下一轮
+  ---
+  duration_ms: 0.3844
+  type: 'test'
+  ...
+# Subtest: 传入已取消的 signal 时一次都不调用
+ok 67 - 传入已取消的 signal 时一次都不调用
+  ---
+  duration_ms: 0.1656
+  type: 'test'
+  ...
+# Subtest: maxOutputTokensCap 收紧预算上限
+ok 68 - maxOutputTokensCap 收紧预算上限
+  ---
+  duration_ms: 1.1164
+  type: 'test'
+  ...
+# Subtest: 连续截断时用满 cap 并报出真实预算
+ok 69 - 连续截断时用满 cap 并报出真实预算
+  ---
+  duration_ms: 0.8913
+  type: 'test'
+  ...
+# Subtest: 挂起的 stream 也能被取消（不依赖 llm.stream 响应 signal）
+ok 70 - 挂起的 stream 也能被取消（不依赖 llm.stream 响应 signal）
+  ---
+  duration_ms: 45.5714
+  type: 'test'
+  ...
+# Subtest: total timeout 是整次增强的共享时限，不会每轮重算
+ok 71 - total timeout 是整次增强的共享时限，不会每轮重算
+  ---
+  duration_ms: 93.2179
+  type: 'test'
+  ...
+# Subtest: quality gate rejects lost protected items
+ok 72 - quality gate rejects lost protected items
+  ---
+  duration_ms: 4.2969
+  type: 'test'
+  ...
+# Subtest: quality gate rejects lost constraints
+ok 73 - quality gate rejects lost constraints
+  ---
+  duration_ms: 0.482
+  type: 'test'
+  ...
+# Subtest: quality gate rejects language replacement
+ok 74 - quality gate rejects language replacement
+  ---
+  duration_ms: 2.337
+  type: 'test'
+  ...
+# Subtest: quality gate rejects references invented outside draft and context
+ok 75 - quality gate rejects references invented outside draft and context
+  ---
+  duration_ms: 0.7652
+  type: 'test'
+  ...
+# Subtest: context paths are allowed as grounded references
+ok 76 - context paths are allowed as grounded references
+  ---
+  duration_ms: 0.1909
+  type: 'test'
+  ...
+# Subtest: comparison reports before and after metrics
+ok 77 - comparison reports before and after metrics
+  ---
+  duration_ms: 0.2837
+  type: 'test'
+  ...
+# Subtest: language preservation helper accepts technical identifiers
+ok 78 - language preservation helper accepts technical identifiers
+  ---
+  duration_ms: 0.1136
+  type: 'test'
+  ...
+# Subtest: diff summary and unified diff mark additions
+ok 79 - diff summary and unified diff mark additions
+  ---
+  duration_ms: 0.8246
+  type: 'test'
+  ...
+1..79
+# tests 79
+# suites 0
+# pass 79
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1131.3959

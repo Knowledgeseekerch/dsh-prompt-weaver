@@ -1,0 +1,509 @@
+TAP version 13
+# Subtest: classifies "打开抖音并点赞" as automation
+ok 1 - classifies "打开抖音并点赞" as automation
+  ---
+  duration_ms: 3.1154
+  type: 'test'
+  ...
+# Subtest: classifies "如何打开抖音并点赞" as automation
+ok 2 - classifies "如何打开抖音并点赞" as automation
+  ---
+  duration_ms: 0.6602
+  type: 'test'
+  ...
+# Subtest: classifies "打开设置页面并点击导出" as automation
+ok 3 - classifies "打开设置页面并点击导出" as automation
+  ---
+  duration_ms: 0.1519
+  type: 'test'
+  ...
+# Subtest: classifies "导出接口文档" as automation
+ok 4 - classifies "导出接口文档" as automation
+  ---
+  duration_ms: 0.139
+  type: 'test'
+  ...
+# Subtest: classifies "Open settings and click Export" as automation
+ok 5 - classifies "Open settings and click Export" as automation
+  ---
+  duration_ms: 0.4245
+  type: 'test'
+  ...
+# Subtest: classifies "请帮我实现登录功能" as code
+ok 6 - classifies "请帮我实现登录功能" as code
+  ---
+  duration_ms: 0.5557
+  type: 'test'
+  ...
+# Subtest: classifies "This is important" as general
+ok 7 - classifies "This is important" as general
+  ---
+  duration_ms: 0.3753
+  type: 'test'
+  ...
+# Subtest: classifies "Wholesale prices are rising" as general
+ok 8 - classifies "Wholesale prices are rising" as general
+  ---
+  duration_ms: 0.1652
+  type: 'test'
+  ...
+# Subtest: classifies "open prefix editor" as automation
+ok 9 - classifies "open prefix editor" as automation
+  ---
+  duration_ms: 0.1258
+  type: 'test'
+  ...
+# Subtest: classifies "什么是 DeepSeek Harness？" as question
+ok 10 - classifies "什么是 DeepSeek Harness？" as question
+  ---
+  duration_ms: 1.6123
+  type: 'test'
+  ...
+# Subtest: classifies "Who maintains this?" as question
+ok 11 - classifies "Who maintains this?" as question
+  ---
+  duration_ms: 0.2695
+  type: 'test'
+  ...
+# Subtest: looksLikeOperation requires an operation verb and no build verb
+ok 12 - looksLikeOperation requires an operation verb and no build verb
+  ---
+  duration_ms: 0.1922
+  type: 'test'
+  ...
+# Subtest: looksLikeQuestion excludes request and build phrasing
+ok 13 - looksLikeQuestion excludes request and build phrasing
+  ---
+  duration_ms: 0.4595
+  type: 'test'
+  ...
+# Subtest: length boundaries: empty is not a question, 300 chars allowed, 301 rejected
+ok 14 - length boundaries: empty is not a question, 300 chars allowed, 301 rejected
+  ---
+  duration_ms: 0.1917
+  type: 'test'
+  ...
+# Subtest: known limitation: 怎么做页面 stays a question
+ok 15 - known limitation: 怎么做页面 stays a question
+  ---
+  duration_ms: 0.157
+  type: 'test'
+  ...
+# Subtest: CLI enhance runs offline and emits JSON
+ok 16 - CLI enhance runs offline and emits JSON
+  ---
+  duration_ms: 321.5296
+  type: 'test'
+  ...
+# Subtest: CLI frameworks validate accepts bundled examples
+ok 17 - CLI frameworks validate accepts bundled examples
+  ---
+  duration_ms: 203.2847
+  type: 'test'
+  ...
+# Subtest: CLI config export contains preferences and custom frameworks
+ok 18 - CLI config export contains preferences and custom frameworks
+  ---
+  duration_ms: 189.5487
+  type: 'test'
+  ...
+# Subtest: CLI blocks sensitive drafts without echoing the secret
+ok 19 - CLI blocks sensitive drafts without echoing the secret
+  ---
+  duration_ms: 178.1695
+  type: 'test'
+  ...
+# Subtest: CLI compare prints a deterministic report
+ok 20 - CLI compare prints a deterministic report
+  ---
+  duration_ms: 191.3423
+  type: 'test'
+  ...
+# Subtest: client registers the composer slot and public RPC endpoints
+ok 21 - client registers the composer slot and public RPC endpoints
+  ---
+  duration_ms: 1.1863
+  type: 'test'
+  ...
+# Subtest: client preserves attachments and slash-command input instead of rejecting it
+ok 22 - client preserves attachments and slash-command input instead of rejecting it
+  ---
+  duration_ms: 0.2555
+  type: 'test'
+  ...
+# Subtest: client does not auto-submit or persist prompt text
+ok 23 - client does not auto-submit or persist prompt text
+  ---
+  duration_ms: 0.1884
+  type: 'test'
+  ...
+# Subtest: default config is frozen and valid
+ok 24 - default config is frozen and valid
+  ---
+  duration_ms: 2.6777
+  type: 'test'
+  ...
+# Subtest: config rejects unknown keys and out-of-range values
+ok 25 - config rejects unknown keys and out-of-range values
+  ---
+  duration_ms: 1.322
+  type: 'test'
+  ...
+# Subtest: built-in frameworks remain frozen and registerable IDs are validated
+ok 26 - built-in frameworks remain frozen and registerable IDs are validated
+  ---
+  duration_ms: 2.58
+  type: 'test'
+  ...
+# Subtest: custom frameworks register, select, and export
+ok 27 - custom frameworks register, select, and export
+  ---
+  duration_ms: 1.9592
+  type: 'test'
+  ...
+# Subtest: framework import conflict policies work
+ok 28 - framework import conflict policies work
+  ---
+  duration_ms: 2.8156
+  type: 'test'
+  ...
+# Subtest: framework validation rejects malformed custom sections
+ok 29 - framework validation rejects malformed custom sections
+  ---
+  duration_ms: 0.504
+  type: 'test'
+  ...
+# Subtest: configuration export contains only preferences and custom frameworks
+ok 30 - configuration export contains only preferences and custom frameworks
+  ---
+  duration_ms: 2.8397
+  type: 'test'
+  ...
+# Subtest: configuration import validates and applies conflict policy
+ok 31 - configuration import validates and applies conflict policy
+  ---
+  duration_ms: 2.3879
+  type: 'test'
+  ...
+# Subtest: configuration import rejects malformed bundles
+ok 32 - configuration import rejects malformed bundles
+  ---
+  duration_ms: 0.5458
+  type: 'test'
+  ...
+# Subtest: context collector selects grounded files and redacts secrets
+ok 33 - context collector selects grounded files and redacts secrets
+  ---
+  duration_ms: 9.1205
+  type: 'test'
+  ...
+# Subtest: context collector degrades when fs is unavailable
+ok 34 - context collector degrades when fs is unavailable
+  ---
+  duration_ms: 1.132
+  type: 'test'
+  ...
+# Subtest: context collector redacts assistant messages only when opted in
+ok 35 - context collector redacts assistant messages only when opted in
+  ---
+  duration_ms: 1.3112
+  type: 'test'
+  ...
+# Subtest: mixed draft preserves slash command, file references, URLs, and versions
+ok 36 - mixed draft preserves slash command, file references, URLs, and versions
+  ---
+  duration_ms: 5.5917
+  type: 'test'
+  ...
+# Subtest: command-only draft is detected
+ok 37 - command-only draft is detected
+  ---
+  duration_ms: 0.3034
+  type: 'test'
+  ...
+# Subtest: explicit occurrences are trusted only when they match text
+ok 38 - explicit occurrences are trusted only when they match text
+  ---
+  duration_ms: 0.4327
+  type: 'test'
+  ...
+# Subtest: language detection distinguishes Chinese and English prose
+ok 39 - language detection distinguishes Chinese and English prose
+  ---
+  duration_ms: 0.7485
+  type: 'test'
+  ...
+# Subtest: constraints are extracted with original anchors
+ok 40 - constraints are extracted with original anchors
+  ---
+  duration_ms: 1.0599
+  type: 'test'
+  ...
+# Subtest: analysis includes ambiguity heuristics without inventing answers
+ok 41 - analysis includes ambiguity heuristics without inventing answers
+  ---
+  duration_ms: 4.409
+  type: 'test'
+  ...
+# Subtest: mixed engineering prompt is not classified as general
+ok 42 - mixed engineering prompt is not classified as general
+  ---
+  duration_ms: 1.9752
+  type: 'test'
+  ...
+# Subtest: local engine enhances mixed draft and preserves protected items
+ok 43 - local engine enhances mixed draft and preserves protected items
+  ---
+  duration_ms: 15.7388
+  type: 'test'
+  ...
+# Subtest: engine rejects command-only draft instead of silently failing
+ok 44 - engine rejects command-only draft instead of silently failing
+  ---
+  duration_ms: 1.537
+  type: 'test'
+  ...
+# Subtest: engine blocks high-confidence secrets by default
+ok 45 - engine blocks high-confidence secrets by default
+  ---
+  duration_ms: 0.6052
+  type: 'test'
+  ...
+# Subtest: engine enforces draft length before calling the model
+ok 46 - engine enforces draft length before calling the model
+  ---
+  duration_ms: 0.6144
+  type: 'test'
+  ...
+# Subtest: engine rejects model output that adds unverified assumptions
+ok 47 - engine rejects model output that adds unverified assumptions
+  ---
+  duration_ms: 1.7143
+  type: 'test'
+  ...
+# Subtest: engine rejects output that loses the slash command or references
+ok 48 - engine rejects output that loses the slash command or references
+  ---
+  duration_ms: 1.2739
+  type: 'test'
+  ...
+# Subtest: engine supports explicit framework selection
+ok 49 - engine supports explicit framework selection
+  ---
+  duration_ms: 1.6811
+  type: 'test'
+  ...
+# Subtest: engine supports bounded iteration with feedback as a constraint
+ok 50 - engine supports bounded iteration with feedback as a constraint
+  ---
+  duration_ms: 1.1538
+  type: 'test'
+  ...
+# Subtest: engine rejects iteration beyond configured maximum
+ok 51 - engine rejects iteration beyond configured maximum
+  ---
+  duration_ms: 0.4961
+  type: 'test'
+  ...
+# Subtest: host plugin registers the service and Remote descriptor
+ok 52 - host plugin registers the service and Remote descriptor
+  ---
+  duration_ms: 3.7199
+  type: 'test'
+  ...
+# Subtest: host service enhances a mixed draft through the DSH llm seam
+ok 53 - host service enhances a mixed draft through the DSH llm seam
+  ---
+  duration_ms: 24.3048
+  type: 'test'
+  ...
+# Subtest: host service reports command-only drafts as a readable failure
+ok 54 - host service reports command-only drafts as a readable failure
+  ---
+  duration_ms: 2.4494
+  type: 'test'
+  ...
+# Subtest: host service lists frameworks and round-trips configuration
+ok 55 - host service lists frameworks and round-trips configuration
+  ---
+  duration_ms: 12.4116
+  type: 'test'
+  ...
+# Subtest: typert descriptor declares cancellation and direct invocations
+ok 56 - typert descriptor declares cancellation and direct invocations
+  ---
+  duration_ms: 0.1849
+  type: 'test'
+  ...
+# Subtest: redaction masks credential assignments without exposing the secret
+ok 57 - redaction masks credential assignments without exposing the secret
+  ---
+  duration_ms: 2.3628
+  type: 'test'
+  ...
+# Subtest: private keys and cloud access keys are detected
+ok 58 - private keys and cloud access keys are detected
+  ---
+  duration_ms: 0.4257
+  type: 'test'
+  ...
+# Subtest: scanner reports offsets only
+ok 59 - scanner reports offsets only
+  ---
+  duration_ms: 0.1577
+  type: 'test'
+  ...
+# Subtest: resolveInitialBudget: config is a floor,估算可抬高，上限 16000
+ok 60 - resolveInitialBudget: config is a floor,估算可抬高，上限 16000
+  ---
+  duration_ms: 1.228
+  type: 'test'
+  ...
+# Subtest: 一次 stop 只调用一次
+ok 61 - 一次 stop 只调用一次
+  ---
+  duration_ms: 1.1093
+  type: 'test'
+  ...
+# Subtest: max-tokens 后用更大预算重试并成功
+ok 62 - max-tokens 后用更大预算重试并成功
+  ---
+  duration_ms: 0.4674
+  type: 'test'
+  ...
+# Subtest: 连续截断必须真的用满 16000 才报错
+ok 63 - 连续截断必须真的用满 16000 才报错
+  ---
+  duration_ms: 0.8468
+  type: 'test'
+  ...
+# Subtest: 非截断错误不重试
+ok 64 - 非截断错误不重试
+  ---
+  duration_ms: 0.3189
+  type: 'test'
+  ...
+# Subtest: tool-calls 映射为可读错误且不重试
+ok 65 - tool-calls 映射为可读错误且不重试
+  ---
+  duration_ms: 0.2568
+  type: 'test'
+  ...
+# Subtest: 取消后不再发起下一轮
+ok 66 - 取消后不再发起下一轮
+  ---
+  duration_ms: 0.3811
+  type: 'test'
+  ...
+# Subtest: 传入已取消的 signal 时一次都不调用
+ok 67 - 传入已取消的 signal 时一次都不调用
+  ---
+  duration_ms: 0.352
+  type: 'test'
+  ...
+# Subtest: quality gate rejects lost protected items
+ok 68 - quality gate rejects lost protected items
+  ---
+  duration_ms: 8.776
+  type: 'test'
+  ...
+# Subtest: quality gate rejects lost constraints
+ok 69 - quality gate rejects lost constraints
+  ---
+  duration_ms: 1.6548
+  type: 'test'
+  ...
+# Subtest: quality gate rejects language replacement
+ok 70 - quality gate rejects language replacement
+  ---
+  duration_ms: 4.0105
+  type: 'test'
+  ...
+# Subtest: quality gate rejects references invented outside draft and context
+ok 71 - quality gate rejects references invented outside draft and context
+  ---
+  duration_ms: 0.4984
+  type: 'test'
+  ...
+# Subtest: context paths are allowed as grounded references
+ok 72 - context paths are allowed as grounded references
+  ---
+  duration_ms: 0.3863
+  type: 'test'
+  ...
+# Subtest: comparison reports before and after metrics
+ok 73 - comparison reports before and after metrics
+  ---
+  duration_ms: 0.5383
+  type: 'test'
+  ...
+# Subtest: language preservation helper accepts technical identifiers
+ok 74 - language preservation helper accepts technical identifiers
+  ---
+  duration_ms: 0.1233
+  type: 'test'
+  ...
+# Subtest: diff summary and unified diff mark additions
+ok 75 - diff summary and unified diff mark additions
+  ---
+  duration_ms: 1.497
+  type: 'test'
+  ...
+1..75
+# tests 75
+# suites 0
+# pass 75
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1372.5666
+# start of coverage report
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# file                        | line % | branch % | funcs % | uncovered lines
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# bin                         |        |          |         | 
+#  dsh-prompt-weaver.js       |  79.93 |    40.82 |   89.47 | 67-69 87-89 95-104 109-111 123-125 133-141 144-148 155 157-167 198-199 269-270 285 288-291 296-298
+# index.js                    | 100.00 |    83.33 |  100.00 | 
+# src                         |        |          |         | 
+#  core                       |        |          |         | 
+#   analyze.js                |  97.93 |    89.87 |  100.00 | 46-49
+#   builtins.js               | 100.00 |   100.00 |  100.00 | 
+#   config-io.js              |  96.30 |    80.00 |   75.00 | 25-26
+#   config.js                 |  89.57 |    82.05 |  100.00 | 38-41 47-48 58-59 61-62 89-90
+#   constants.js              | 100.00 |   100.00 |  100.00 | 
+#   context.js                |  94.57 |    70.40 |   97.56 | 58-69 94-95 150-151 180
+#   diff.js                   |  76.09 |    86.05 |   82.35 | 13-14 33-35 51-54 82-91 93-97 99-103 130-133
+#   draft.js                  |  92.35 |    83.33 |   92.86 | 15-21 78-79 98 100 132-133
+#   engine.js                 |  87.71 |    71.05 |   76.47 | 117 119 121 123 161-164 180-181 183-184 186-190 192-196 216 222 271-280 283-284
+#   errors.js                 |  83.33 |    45.45 |   75.00 | 22-23 30-31 33-34
+#   frameworks.js             |  78.30 |    70.97 |   83.33 | 16-17 19-20 28-29 31-32 35-36 38-39 43-44 47-48 92-93 106-107 119 148-150 155-157 186-201 204-210 220
+#   json.js                   |  77.42 |    84.62 |   75.00 | 8-9 21-22 29-31
+#   local-provider.js         |  80.25 |    78.13 |   75.00 | 60-65 67-69 71-75 80-81
+#   privacy.js                |  83.33 |    85.71 |   80.00 | 66-78
+#   prompt.js                 |  98.96 |    55.17 |  100.00 | 27
+#   provider.js               |  91.61 |    80.00 |   88.89 | 21-22 25-26 56-58 112-113 119-120 130
+#   quality.js                |  94.22 |    82.35 |  100.00 | 63-68 71-72 146-147 154-155 205
+#   structured.js             |  82.50 |    36.84 |   85.71 | 14-15 23-24 38-39 52-53 58-59 72-73 79-80
+#   utils.js                  |  73.17 |    80.00 |   54.55 | 23-32 35-36 39-41 74-75 78-82
+#   validate.js               |  73.17 |    68.00 |   90.00 | 6-7 13-14 16-17 19-20 26-27 44-45 51-52 64-65 70-75
+#  host                       |        |          |         | 
+#   descriptor.js             | 100.00 |   100.00 |  100.00 | 
+#   service.js                |  64.29 |    39.13 |   66.67 | 12-13 32-35 41-42 44-45 52-53 56-59 66-69 73-78 95 97 100-102 104-112
+# tests                       |        |          |         | 
+#  classification.test.js     | 100.00 |   100.00 |  100.00 | 
+#  cli.test.js                | 100.00 |   100.00 |  100.00 | 
+#  client-contract.test.js    | 100.00 |   100.00 |  100.00 | 
+#  config-frameworks.test.js  | 100.00 |   100.00 |  100.00 | 
+#  config-io.test.js          | 100.00 |   100.00 |  100.00 | 
+#  context.test.js            |  97.44 |    83.33 |  100.00 | 40-41 46
+#  draft-analysis.test.js     | 100.00 |   100.00 |  100.00 | 
+#  engine.test.js             | 100.00 |   100.00 |  100.00 | 
+#  host.test.js               |  96.74 |    93.33 |   88.00 | 25-26 98-101
+#  privacy.test.js            | 100.00 |   100.00 |  100.00 | 
+#  provider-retry.test.js     |  95.15 |    88.46 |   94.44 | 22-25 33
+#  quality-diff.test.js       |  96.70 |   100.00 |   92.31 | 9-11
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# all files                   |  90.30 |    76.93 |   90.63 | 
+# ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# end of coverage report

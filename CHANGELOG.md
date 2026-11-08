@@ -4,6 +4,21 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-11-08
+
+### Changed
+
+- `timeoutMs` now bounds the whole enhancement instead of each attempt: retries share one deadline, so a 30-second setting can no longer take 90 seconds.
+- The output budget cap is configurable through `maxOutputTokensCap` (default 16000), so users on models with a smaller output limit can tighten it.
+
+### Fixed
+
+- A stream that ignores the abort signal could hang the request forever; the reader now races `iterator.next()` against an abort promise so cancellation returns immediately, and releases the iterator through `return()` when possible.
+
+### Added
+
+- `tests/provider-timeout.test.js`: cap enforcement, cancellation of a hanging stream, and shared-deadline behaviour. Suite is now 79 cases.
+
 ## [0.2.1] - 2026-11-08
 
 ### Fixed

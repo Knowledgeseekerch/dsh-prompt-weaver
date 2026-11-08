@@ -55,6 +55,7 @@ export const DEFAULT_CONFIG = Object.freeze({
   maxDraftChars: 20000,
   maxResultChars: 40000,
   maxOutputTokens: 8192,
+  maxOutputTokensCap: 16000,
   timeoutMs: 45000,
   temperature: 0.2,
   maxIterations: 5,
