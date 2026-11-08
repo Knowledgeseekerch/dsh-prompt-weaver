@@ -4,6 +4,12 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.11] - 2026-11-08
+
+### Fixed
+
+- `request.clientKey` is now part of the accepted request shape. The service strips it before the engine runs, but a host still on an older build rejected the whole request with `invalid-config: request has unknown key(s): clientKey` as soon as the newer client sent it. Tolerating the key makes a client/host version mismatch fail softly instead of breaking every enhancement.
+
 ## [0.2.10] - 2026-11-08
 
 ### Fixed

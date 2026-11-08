@@ -22,6 +22,9 @@ const REQUEST_KEYS = new Set([
   'occurrences',
   'attachmentCount',
   'iteration',
+  // 前端用于把结果暂存到会话的键；engine 不使用，但必须容忍，
+  // 否则 host 与 client 版本错配时会以「未知字段」拒绝整个请求。
+  'clientKey',
 ])
 
 const ITERATION_KEYS = new Set(['round', 'previousText', 'feedback'])
