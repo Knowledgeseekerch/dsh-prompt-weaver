@@ -58,6 +58,10 @@ window.__ModuleLoader__.load({
       noFrameworks: 'No frameworks available',
       iteration: 'Iteration',
       failedGate: 'The result failed the original-intent check.',
+      copy: 'Copy',
+      copied: 'Copied to clipboard.',
+      copyFailed: 'Copy failed.',
+      assumptions: 'Assumptions',
     }
 
     const zh = {
@@ -104,6 +108,10 @@ window.__ModuleLoader__.load({
       noFrameworks: '没有可用框架',
       iteration: '迭代',
       failedGate: '结果未通过原意保留检查。',
+      copy: '复制',
+      copied: '已复制到剪贴板。',
+      copyFailed: '复制失败。',
+      assumptions: '模型补充的前提',
     }
 
     const css = `
@@ -468,6 +476,17 @@ window.__ModuleLoader__.load({
         toast('success', t('undone'))
       }
 
+      // 结果只落在 textarea 里，想单独拿出去粘贴时不必手动全选。
+      const copyResult = async () => {
+        try {
+          if (navigator?.clipboard?.writeText === undefined) throw new Error('clipboard unavailable')
+          await navigator.clipboard.writeText(edited)
+          toast('success', t('copied'))
+        } catch {
+          toast('error', t('copyFailed'))
+        }
+      }
+
       const doImport = async (file) => {
         if (rpc === undefined) {
           toast('error', t('unavailable'))
@@ -613,6 +632,7 @@ window.__ModuleLoader__.load({
         result === null ? null : h('div', { className: 'dsh-pw-list' },
           h('div', { className: 'dsh-pw-row' },
             h('button', { type: 'button', className: 'dsh-pw-button-control', onClick: apply }, t('apply')),
+            h('button', { type: 'button', className: 'dsh-pw-button-control', onClick: copyResult }, t('copy')),
             h('button', {
               type: 'button',
               className: 'dsh-pw-button-control',
@@ -655,6 +675,7 @@ window.__ModuleLoader__.load({
             })
           ),
           renderQuality(result, t),
+          renderAssumptions(result, t),
           renderAnalysis(result, t),
           renderContext(result, t)
         ),
@@ -877,6 +898,17 @@ window.__ModuleLoader__.load({
       )
     }
 
+    // assumptions 是模型为了继续下去而自己补的前提。之前只在 toast 里报个数，
+    // 用户看不到具体内容，就无法判断这个前提能不能成立。
+    function renderAssumptions(result, t) {
+      const assumptions = result.assumptions
+      if (!Array.isArray(assumptions) || assumptions.length === 0) return null
+      return h('div', { className: 'dsh-pw-card' },
+        h('strong', null, t('assumptions')),
+        h('ul', null, assumptions.map((item, index) => h('li', { key: index }, String(item))))
+      )
+    }
+
     function renderAnalysis(result, t) {
       const analysis = result.analysis
       if (analysis === undefined) return null
@@ -896,17 +928,114 @@ window.__ModuleLoader__.load({
       )
     }
 
+    // 与 src/core/diff.js 同一套语义：LCS 对齐，超长输入退化为公共前后缀。
+    // client bundle 拿不到核心模块，只能内联一份等价实现。
+    // 自拼前后缀只能说明「头尾相同」，中间被改动的词一律看不见，这才是要修的地方。
+    const DIFF_MAX_TOKENS = 1200
+
+    function diffTokenize(text) {
+      return String(text ?? '')
+        .split(/(\s+|[^\p{L}\p{N}_]+)/u)
+        .filter(token => token.length > 0)
+    }
+
+    function diffEscape(text) {
+      return String(text ?? '').replace(/\n/gu, '⏎')
+    }
+
     function renderDiff(original, enhanced) {
-      const left = String(original).split(/(\s+)/u).filter(token => token.length > 0)
-      const right = String(enhanced).split(/(\s+)/u).filter(token => token.length > 0)
+      const left = diffTokenize(original)
+      const right = diffTokenize(enhanced)
+      const operations = left.length * right.length > DIFF_MAX_TOKENS * DIFF_MAX_TOKENS
+        ? diffByEdges(left, right)
+        : diffByTable(left, right)
+      const lines = []
+      for (const operation of operations) {
+        if (operation.type === 'equal') lines.push(`  ${diffEscape(operation.text)}`)
+        else if (operation.type === 'delete') lines.push(`- ${diffEscape(operation.text)}`)
+        else if (operation.type === 'insert') lines.push(`+ ${diffEscape(operation.text)}`)
+        else {
+          lines.push(`- ${diffEscape(operation.text)}`)
+          lines.push(`+ ${diffEscape(operation.replacement)}`)
+        }
+      }
+      return lines.join('\n')
+    }
+
+    function diffByTable(left, right) {
+      const table = Array.from({ length: left.length + 1 }, () => new Uint32Array(right.length + 1))
+      for (let i = left.length - 1; i >= 0; i -= 1) {
+        for (let j = right.length - 1; j >= 0; j -= 1) {
+          table[i][j] = left[i] === right[j]
+            ? table[i + 1][j + 1] + 1
+            : Math.max(table[i + 1][j], table[i][j + 1])
+        }
+      }
+      const operations = []
+      let i = 0
+      let j = 0
+      while (i < left.length && j < right.length) {
+        if (left[i] === right[j]) {
+          pushDiffOperation(operations, 'equal', left[i])
+          i += 1
+          j += 1
+        } else if (table[i + 1][j] >= table[i][j + 1]) {
+          pushDiffOperation(operations, 'delete', left[i])
+          i += 1
+        } else {
+          pushDiffOperation(operations, 'insert', right[j])
+          j += 1
+        }
+      }
+      while (i < left.length) {
+        pushDiffOperation(operations, 'delete', left[i])
+        i += 1
+      }
+      while (j < right.length) {
+        pushDiffOperation(operations, 'insert', right[j])
+        j += 1
+      }
+      return mergeDiffOperations(operations)
+    }
+
+    function diffByEdges(left, right) {
       const prefix = commonPrefix(left, right)
       const suffix = commonSuffix(left.slice(prefix), right.slice(prefix))
-      const lines = []
-      for (const token of left.slice(0, prefix)) lines.push(`  ${token}`)
-      for (const token of left.slice(prefix, left.length - suffix)) lines.push(`- ${token}`)
-      for (const token of right.slice(prefix, right.length - suffix)) lines.push(`+ ${token}`)
-      for (const token of left.slice(left.length - suffix)) lines.push(`  ${token}`)
-      return lines.join('')
+      const operations = []
+      for (let index = 0; index < prefix; index += 1) pushDiffOperation(operations, 'equal', left[index])
+      for (const token of left.slice(prefix, left.length - suffix)) pushDiffOperation(operations, 'delete', token)
+      for (const token of right.slice(prefix, right.length - suffix)) pushDiffOperation(operations, 'insert', token)
+      for (const token of left.slice(left.length - suffix)) pushDiffOperation(operations, 'equal', token)
+      return mergeDiffOperations(operations)
+    }
+
+    function pushDiffOperation(operations, type, text) {
+      const previous = operations[operations.length - 1]
+      if (previous !== undefined && previous.type === type) {
+        previous.text += text
+        return
+      }
+      operations.push({ type, text })
+    }
+
+    function mergeDiffOperations(operations) {
+      const merged = []
+      for (let index = 0; index < operations.length; index += 1) {
+        const current = operations[index]
+        const next = operations[index + 1]
+        if (current.type === 'delete' && next?.type === 'insert') {
+          merged.push({ type: 'replace', text: current.text, replacement: next.text })
+          index += 1
+          continue
+        }
+        if (current.type === 'insert' && next?.type === 'delete') {
+          merged.push({ type: 'replace', text: next.text, replacement: current.text })
+          index += 1
+          continue
+        }
+        merged.push({ type: current.type, text: current.text })
+      }
+      return merged
     }
 
     function commonPrefix(left, right) {

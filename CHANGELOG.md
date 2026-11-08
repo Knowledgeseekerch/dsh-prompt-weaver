@@ -4,6 +4,18 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.14] - 2026-11-08
+
+### Added
+
+- The result panel can copy the enhanced prompt to the clipboard, so a result meant to be pasted somewhere else no longer needs a manual select-all.
+- The panel now lists the assumptions the model filled in, one per line. The toast used to report only a count, which left no way to judge whether a filled-in gap actually held.
+- The comparison view aligns both sides with a longest-common-subsequence diff instead of trimming a shared prefix and suffix, so an edit in the middle of a prompt is visible. Inputs past roughly 1200 tokens a side fall back to the prefix/suffix view rather than allocating the full table.
+
+### Fixed
+
+- `sessionIdRef` was declared in the panel but read in the button, so every one-click run threw as soon as write-back started. It is now declared where it is read.
+
 ## [0.2.13] - 2026-11-08
 
 ### Fixed
