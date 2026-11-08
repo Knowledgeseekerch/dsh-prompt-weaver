@@ -13,7 +13,7 @@ const DOMAINS = Object.freeze([
     id: 'hardware',
     keywords: [
       '小车', '机器人', '电路', '单片机', '电机', '舵机', '传感器', '硬件', '电路板', '电源', '电池',
-      '驱动', '焊接', '面包板', '树莓派', '机械', '结构件', '轴承', '齿轮', '3d打印', '雷达', '摄像头',
+      '驱动', '面包板', '树莓派', '3d打印', '雷达', '摄像头',
       'arduino', 'stm32', 'esp32', 'raspberry', 'pcb', 'servo', 'motor', 'sensor', 'robot', 'circuit',
       'hardware', 'microcontroller',
     ],
@@ -250,6 +250,75 @@ const DOMAINS = Object.freeze([
         zh: '主要风险与提前排除的方法',
         en: 'the main risks and how to rule each one out early',
         slots: { zh: ['风险', '排除方法'], en: ['risk', 'pre-emptive check'] },
+      },
+    ],
+  },
+  {
+    // 机械设计制造：这是「图纸 → 模型」那类任务真正的执行前提。
+    // 与 hardware（电子/嵌入式）分开，两者的必答项几乎不重叠：
+    // 电子问控制层与供电，机械问材料、公差、加工与基准。
+    id: 'mechanical',
+    keywords: [
+      '支架', '法兰', '法兰盘', '轴', '传动轴', '齿轮', '箱体', '壳体', '机架', '底座', '导轨',
+      '连杆', '钣金', '板件', '焊接件', '铸件', '锻件', '零件', '零件图', '装配图', '装配体',
+      '工程图', '图纸', '三维模型', '建模', '草图', '倒角', '圆角', '键槽', '轴承座', '退刀槽',
+      '减速器', '减速箱', '齿轮箱', '蜗轮', '蜗杆', '联轴器', '丝杠', '皮带轮', '链条', '轴承',
+      '密封圈', '垫片', '销轴', '螺栓', '螺母', '板厚', '壁厚', '孔径', '孔距',
+      '公差', '配合', '形位公差', '粗糙度', '热处理', '淬火', '调质', '退火', '正火', '表面处理',
+      '镀锌', '阳极氧化', '发黑',
+      '加工', '机加工', '铣削', '车削', '钻削', '磨削', '线切割', '冲压', '注塑', '焊接',
+      '机械', '结构件',
+      'solidworks', 'creo', 'catia', 'autocad', 'machining', 'tolerance',
+      'sheet metal', 'weldment', 'bracket', 'flange', 'shaft', 'gearbox', 'mechanical',
+    ],
+    dimensions: [
+      {
+        id: 'material',
+        zh: '材料与热处理：牌号、热处理、表面处理',
+        en: 'material and heat treatment: grade, heat treatment, surface finish',
+        slots: { zh: ['材料牌号', '热处理', '表面处理'], en: ['grade', 'heat treatment', 'surface finish'] },
+      },
+      {
+        id: 'geometry',
+        zh: '关键几何：总体尺寸、特征尺寸、基准',
+        en: 'key geometry: overall size, feature size, datum',
+        slots: { zh: ['总体尺寸', '特征尺寸', '基准'], en: ['overall size', 'feature size', 'datum'] },
+      },
+      {
+        id: 'tolerance',
+        zh: '公差与配合：尺寸公差、形位公差、配合制',
+        en: 'tolerance and fit: dimensional tolerance, geometric tolerance, fit system',
+        slots: { zh: ['尺寸公差', '形位公差', '配合制'], en: ['dimensional tolerance', 'geometric tolerance', 'fit system'] },
+      },
+      {
+        id: 'process',
+        zh: '加工工艺：工艺路线、加工设备、可加工性',
+        en: 'manufacturing process: route, machine, manufacturability',
+        slots: { zh: ['工艺路线', '加工设备', '可加工性'], en: ['process route', 'machine', 'manufacturability'] },
+      },
+      {
+        id: 'assembly',
+        zh: '装配约束：配合面、定位方式、紧固方式',
+        en: 'assembly constraints: mating face, locating method, fastening',
+        slots: { zh: ['配合面', '定位方式', '紧固'], en: ['mating face', 'locating method', 'fastening'] },
+      },
+      {
+        id: 'load',
+        zh: '载荷与工况：受力、安全系数、工作环境',
+        en: 'loads and working conditions: forces, safety factor, environment',
+        slots: { zh: ['受力', '安全系数', '工作环境'], en: ['loads', 'safety factor', 'environment'] },
+      },
+      {
+        id: 'inspection',
+        zh: '检验判据：量具、合格判据',
+        en: 'inspection: instrument, acceptance criterion',
+        slots: { zh: ['量具', '合格判据'], en: ['instrument', 'acceptance criterion'] },
+      },
+      {
+        id: 'failure',
+        zh: '失效模式：典型失效、排查顺序',
+        en: 'failure modes: typical failure, check order',
+        slots: { zh: ['典型失效', '排查顺序'], en: ['typical failure', 'check order'] },
       },
     ],
   },

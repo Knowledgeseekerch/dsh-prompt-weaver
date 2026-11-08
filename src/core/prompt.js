@@ -1,7 +1,7 @@
 import { describeDimensions, pickSlots } from './domains.js'
 import { freezeDeep } from './utils.js'
 
-export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultChars, domains }) {
+export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultChars, domains, completeness }) {
   const instructions = [
     'You are a prompt enhancement engine for an AI coding and general-purpose assistant.',
     'Return one JSON object and no other text.',
@@ -50,7 +50,22 @@ export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultCha
     for (const line of describeDimensions(domains, locale)) instructions.push(`- ${line}`)
   }
 
+  // 只列草稿仍未覆盖的维度：已经说过的再问一遍，比不问更烦人。
+  const unanswered = unansweredDimensions(completeness)
+  if (unanswered.length > 0) {
+    instructions.push('These dimensions are still unanswered by the draft. Fold each into the enhanced prompt as something the executor must specify, and never supply the answer yourself:')
+    for (const line of unanswered) instructions.push(`- ${line}`)
+  }
+
   return instructions.join('\n')
+}
+
+function unansweredDimensions(completeness) {
+  if (completeness === undefined || completeness === null || !Array.isArray(completeness.gaps)) return []
+  return completeness.gaps
+    .slice(0, 6)
+    .map(gap => gap.question)
+    .filter(question => typeof question === 'string' && question.length > 0)
 }
 
 export function buildUserPayload({ draft, analysis, framework, context, iteration, locale = 'en', domains }) {

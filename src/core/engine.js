@@ -3,6 +3,7 @@ import { MODES } from './constants.js'
 import { PromptWeaverError } from './errors.js'
 import { TASK_TYPES } from './constants.js'
 import { parseMixedDraft } from './draft.js'
+import { assessCompleteness } from './completeness.js'
 import { createDomainCache, resolveDomains } from './domain-planner.js'
 import { comparePrompts } from './quality.js'
 import { evaluateQuality } from './quality.js'
@@ -116,8 +117,16 @@ export function createPromptWeaverEngine({
       signal,
       cache: domainCache,
     })
-    const system = buildSystemPrompt({ mode, framework, locale, maxResultChars: activeConfig.maxResultChars, domains })
-    const user = buildUserPayload({ draft, analysis: baseAnalysis, framework, context, iteration, locale, domains })
+    // 完备性检查是纯规则、不调模型；它只描述「还差什么」，绝不替用户回答。
+    // 这里兜一层 try：检查失败也不能影响增强主流程。
+    let completeness
+    try {
+      completeness = assessCompleteness({ draft, domains, analysis: baseAnalysis, locale })
+    } catch {
+      completeness = undefined
+    }
+    const system = buildSystemPrompt({ mode, framework, locale, maxResultChars: activeConfig.maxResultChars, domains, completeness })
+    const user = buildUserPayload({ draft, analysis: baseAnalysis, framework, context, iteration, locale, domains, completeness })
     const output = await modelProvider.complete({
       system,
       user,
@@ -167,6 +176,7 @@ export function createPromptWeaverEngine({
       assumptions: structured.assumptions,
       usedContext: structured.usedContext,
       quality,
+      completeness,
       violations: quality.violations,
       comparison,
       diff,

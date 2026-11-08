@@ -72,6 +72,12 @@ window.__ModuleLoader__.load({
       copied: 'Copied to clipboard.',
       copyFailed: 'Copy failed.',
       assumptions: 'Assumptions',
+      completeness: 'Unanswered requirements',
+      coverage: 'coverage',
+      mustSpecify: 'Must specify first',
+      shouldSpecify: 'Should specify',
+      couldSpecify: 'Worth specifying',
+      noGaps: 'Nothing blocking left to specify.',
     }
 
     const zh = {
@@ -123,6 +129,12 @@ window.__ModuleLoader__.load({
       copied: '已复制到剪贴板。',
       copyFailed: '复制失败。',
       assumptions: '模型补充的前提',
+      completeness: '需求缺口',
+      coverage: '覆盖度',
+      mustSpecify: '必须先定',
+      shouldSpecify: '建议明确',
+      couldSpecify: '可以补充',
+      noGaps: '没有必须补的缺口。',
     }
 
     const css = `
@@ -729,6 +741,7 @@ window.__ModuleLoader__.load({
             })
           ),
           renderQuality(result, t),
+          renderCompleteness(result, t),
           renderAssumptions(result, t),
           renderAnalysis(result, t),
           renderContext(result, t)
@@ -975,6 +988,40 @@ window.__ModuleLoader__.load({
 
     // assumptions 是模型为了继续下去而自己补的前提。之前只在 toast 里报个数，
     // 用户看不到具体内容，就无法判断这个前提能不能成立。
+    // 缺口清单：把「这类任务必须答清、但草稿还没提」的维度按严重度摆出来。
+    // 之前只报一个前提条数，用户看不出到底缺什么、哪条最要紧。
+    function renderCompleteness(result, t) {
+      const report = result.completeness
+      if (report === undefined || report === null) return null
+      if (!Array.isArray(report.gaps) || report.gaps.length === 0) {
+        return h('div', { className: 'dsh-pw-card' },
+          h('strong', null, t('completeness')),
+          h('div', { className: 'dsh-pw-ok' }, t('noGaps'))
+        )
+      }
+      const percent = Math.round((report.coverage ?? 0) * 100)
+      const groups = [
+        { severity: 'blocking', label: t('mustSpecify'), className: 'dsh-pw-error' },
+        { severity: 'important', label: t('shouldSpecify'), className: 'dsh-pw-muted' },
+        { severity: 'optional', label: t('couldSpecify'), className: 'dsh-pw-muted' },
+      ]
+      return h('div', { className: 'dsh-pw-card' },
+        h('strong', null, `${t('completeness')} · ${t('coverage')} ${percent}%`),
+        groups.map(group => {
+          const items = report.gaps.filter(gap => gap.severity === group.severity)
+          if (items.length === 0) return null
+          return h('div', { key: group.severity },
+            h('div', { className: group.className }, group.label),
+            h('ul', null, items.map(gap => h('li', { key: gap.id },
+              Array.isArray(gap.missingSlots) && gap.missingSlots.length > 0
+                ? `${gap.question} · ${gap.missingSlots.join(' / ')}`
+                : gap.question
+            )))
+          )
+        })
+      )
+    }
+
     function renderAssumptions(result, t) {
       const assumptions = result.assumptions
       if (!Array.isArray(assumptions) || assumptions.length === 0) return null

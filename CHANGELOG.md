@@ -4,6 +4,29 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-11-08
+
+This release moves the enhancer from "ask every dimension" to "ask what is still missing". It also adds the mechanical-engineering domain, which the existing hardware domain could not cover: a bracket and a servo board share almost no required answers.
+
+### Added
+
+- `assessCompleteness`: a deterministic, rule-based check of how many of a domain's required slots the draft already covers. It compares the draft against per-slot probe patterns and returns a coverage ratio, a gap list ordered by severity, and the slots that were satisfied. No model call, no I/O, no randomness — the same draft always produces the same report, which is what makes it usable as an acceptance baseline rather than a vibe.
+- Severity triage per dimension: `blocking` (cannot be manufactured or executed until answered), `important`, and `optional`. The panel groups gaps under these three headings instead of showing one flat list.
+- A mechanical-engineering domain: eight dimensions (material and heat treatment, key geometry, tolerance and fit, manufacturing process, assembly constraints, loads and working conditions, inspection criteria, failure modes) over 22 slots. Words like bracket, flange, gearbox, bearing, bolt, plate thickness, and tolerance now reach this domain instead of matching nothing.
+- The panel shows the unanswered requirements together with the coverage ratio, so a gap is visible before the result is applied rather than implied by a count in a toast.
+- The 49-entry corpus in `tests/fixtures/testset.jsonl` now drives assertions. `tests/testset.test.js` checks report well-formedness, that noise never invents a domain, that mechanical entries reach a domain, that everyday words do not, and that evaluation is deterministic across the whole corpus.
+
+### Changed
+
+- Only the primary domain is checked. `detectDomains` already ranks by match score; inspecting a secondary domain mostly asks questions its few shared keywords pulled in, and dilutes coverage across two unrelated checklists.
+- The system prompt now lists only the dimensions the draft leaves unanswered. Restating what the user already said is worse than saying nothing.
+- Mechanical keywords moved out of `hardware`: a bracket task no longer drags in the controller, motor-driver, sensor, and power-supply checklist.
+
+### Fixed
+
+- `academic` matched the mechanical domain, because it contains the substring `cad`. The bare `cad` keyword is gone; `solidworks`, `catia`, and `autocad` remain.
+- `减速器` matched no domain at all, despite being one of the most common mechanical nouns. The keyword list now carries the parts vocabulary: gearbox, worm gear, coupling, lead screw, bearing, bolt, plate thickness, and so on.
+
 ## [0.2.18] - 2026-11-08
 
 ### Fixed
