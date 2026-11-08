@@ -12,3 +12,7 @@ tmp/
 !.env.example
 *.bak*
 *.bak-*
+
+# 本地测试输出
+coverage-output.txt
+test-output.txt
