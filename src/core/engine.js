@@ -175,6 +175,7 @@ export function createPromptWeaverEngine({
       openQuestions: structured.openQuestions,
       assumptions: structured.assumptions,
       usedContext: structured.usedContext,
+      premiseCheck: structured.premiseCheck,
       quality,
       completeness,
       violations: quality.violations,

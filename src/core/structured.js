@@ -3,7 +3,7 @@ import { safeJsonParse } from './json.js'
 import { rejectUnknownKeys, requireObject, requireString } from './validate.js'
 import { freezeDeep, isPlainObject } from './utils.js'
 
-const ALLOWED_KEYS = new Set(['enhancedPrompt', 'openQuestions', 'assumptions', 'usedContext'])
+const ALLOWED_KEYS = new Set(['enhancedPrompt', 'openQuestions', 'assumptions', 'usedContext', 'premiseCheck'])
 
 export function parseModelOutput(rawOutput, { maxResultChars }) {
   const text = extractJsonObject(String(rawOutput ?? ''))
@@ -28,7 +28,22 @@ export function parseModelOutput(rawOutput, { maxResultChars }) {
     openQuestions: normalizeQuestions(parsed.openQuestions),
     assumptions: normalizeStringArray(parsed.assumptions, 'assumptions', 10),
     usedContext: normalizeStringArray(parsed.usedContext, 'usedContext', 50),
+    premiseCheck: normalizePremiseCheck(parsed.premiseCheck),
   })
+}
+
+/**
+ * 前提复核：用户的任务陈述本身不成立时的唯一出口。
+ * 它不改变任务范围，只是把「这条路大概率走不通」提前说出来。
+ * 字段坏了就当没给——它是附加信息，不该让整次增强失败。
+ */
+function normalizePremiseCheck(value) {
+  if (!isPlainObject(value)) return null
+  if (value.holds !== false) return null
+  const problem = typeof value.problem === 'string' ? value.problem.trim().slice(0, 400) : ''
+  if (problem.length === 0) return null
+  const alternative = typeof value.alternative === 'string' ? value.alternative.trim().slice(0, 400) : ''
+  return { problem, alternative }
 }
 
 function extractJsonObject(text) {

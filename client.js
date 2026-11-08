@@ -73,6 +73,8 @@ window.__ModuleLoader__.load({
       copyFailed: 'Copy failed.',
       assumptions: 'Assumptions',
       completeness: 'Unanswered requirements',
+      premiseTitle: 'The premise does not hold',
+      premiseAlternative: 'What to do instead',
       unprobed: 'No check rules for this domain yet, so nothing was measured.',
       coverage: 'coverage',
       mustSpecify: 'Must specify first',
@@ -131,6 +133,8 @@ window.__ModuleLoader__.load({
       copyFailed: '复制失败。',
       assumptions: '模型补充的前提',
       completeness: '需求缺口',
+      premiseTitle: '前提不成立',
+      premiseAlternative: '建议改成',
       unprobed: '该领域暂无检查规则，未做缺口判定。',
       coverage: '覆盖度',
       mustSpecify: '必须先定',
@@ -742,6 +746,7 @@ window.__ModuleLoader__.load({
               onChange: event => setFeedback(event.target.value),
             })
           ),
+          renderPremise(result, t),
           renderQuality(result, t),
           renderCompleteness(result, t),
           renderAssumptions(result, t),
@@ -971,6 +976,20 @@ window.__ModuleLoader__.load({
     function canApplyResult(result) {
       if (result === undefined || result === null) return false
       return typeof result.text === 'string' && result.text.length > 0
+    }
+
+    // 前提复核：用户要的那件事本身做不到时，这里是唯一能说出口的位置。
+    // 它不改任务范围，只在执行前把「这条路大概率走不通」摆出来。
+    function renderPremise(result, t) {
+      const check = result.premiseCheck
+      if (check === undefined || check === null || typeof check.problem !== 'string') return null
+      return h('div', { className: 'dsh-pw-card' },
+        h('strong', null, t('premiseTitle')),
+        h('div', { className: 'dsh-pw-error' }, check.problem),
+        check.alternative === '' || check.alternative === undefined
+          ? null
+          : h('div', { className: 'dsh-pw-muted' }, `${t('premiseAlternative')}: ${check.alternative}`)
+      )
     }
 
     function renderQuality(result, t) {
