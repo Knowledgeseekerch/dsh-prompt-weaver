@@ -51,6 +51,9 @@ export const PRIVACY_INTEGER_RANGES = Object.freeze({
 
 export const DEFAULT_CONFIG = Object.freeze({
   mode: 'standard',
+  // 草稿没命中内置领域时，多调一次模型自举「该回答哪些维度」。
+  // 内置库覆盖常见领域走零成本快路径，这里只负责长尾。
+  autoDomains: true,
   defaultFramework: 'auto',
   maxDraftChars: 20000,
   maxResultChars: 40000,

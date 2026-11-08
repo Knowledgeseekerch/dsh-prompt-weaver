@@ -3,6 +3,7 @@ import { MODES } from './constants.js'
 import { PromptWeaverError } from './errors.js'
 import { TASK_TYPES } from './constants.js'
 import { parseMixedDraft } from './draft.js'
+import { createDomainCache, resolveDomains } from './domain-planner.js'
 import { comparePrompts } from './quality.js'
 import { evaluateQuality } from './quality.js'
 import { diffSummary } from './diff.js'
@@ -52,6 +53,8 @@ export function createPromptWeaverEngine({
   const activeConfig = config
   const store = frameworkStore
   const modelProvider = provider
+  // 自举出的领域按草稿文本缓存：同一句子反复增强不该每次都多调一次模型。
+  const domainCache = createDomainCache()
 
   async function enhance(request, { signal } = {}) {
     const startedAt = nowMs()
@@ -102,8 +105,19 @@ export function createPromptWeaverEngine({
       ? emptyContext()
       : await contextProvider({ draft, config: activeConfig, signal })
 
-    const system = buildSystemPrompt({ mode, framework, locale, maxResultChars: activeConfig.maxResultChars })
-    const user = buildUserPayload({ draft, analysis: baseAnalysis, framework, context, iteration, locale })
+    // 内置领域库命中就走快路径（零额外调用）；没命中再让模型自举维度，
+    // 这样覆盖面不再被手工维护的那几个领域卡死。
+    const domains = await resolveDomains({
+      domains: baseAnalysis.domains,
+      draft,
+      analysis: baseAnalysis,
+      provider: modelProvider,
+      config: activeConfig,
+      signal,
+      cache: domainCache,
+    })
+    const system = buildSystemPrompt({ mode, framework, locale, maxResultChars: activeConfig.maxResultChars, domains })
+    const user = buildUserPayload({ draft, analysis: baseAnalysis, framework, context, iteration, locale, domains })
     const output = await modelProvider.complete({
       system,
       user,

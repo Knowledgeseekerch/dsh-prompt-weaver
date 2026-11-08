@@ -8,10 +8,12 @@
 |---|---|
 | 源码 | `D:\AI\agent\2026-11-07-23-53-35\dsh-prompt-weaver` |
 | 本地安装方式 | junction：`~/.dsh/profiles/desktop/node_modules/dsh-prompt-weaver` 直连源码 |
-| 已发布版本 | `v0.2.16`（远端最新 tag） |
+| 已发布版本 | `v0.2.17`（远端最新 tag） |
 | 未发布提交 | 无 |
-| 测试 | 90 项全过 |
-| 静态检查 | `node scripts/check.mjs` 与 `scripts/lint.mjs` 通过 |
+| 测试 | 103 项全过 |
+| 静态检查 | `node scripts/check.mjs`（48 JS / 11 JSON）与 `scripts/lint.mjs`（81 文件）通过 |
+
+**能力变更（0.2.17）**：增强器不只润色措辞了，还会补「这类任务要能执行、执行方必须先答清什么」。内置六个领域（hardware / software / research / writing / operations / plan，98 个槽位）；没命中就调一次模型自举维度，代价是未命中草稿多一次模型调用，可用 `config.autoDomains=false` 关掉。硬约束：只要求回答维度，不许替用户拍板答案——自举结果里出现型号/价格/品牌的整条丢弃。
 
 **质量检测的定位（0.2.16 起）**：违规只记录、不否决。引擎任何模式下都交付模型给的文本，客户端任何模式下都写回，偏离只在 toast 与面板里提示。唯一仍会拒绝的是 `strict` 模式下的「模型擅自补前提」——那不是阈值误判，是模型编了事实。
 

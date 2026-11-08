@@ -12,6 +12,7 @@ import { freezeDeep, isPlainObject } from './utils.js'
 const TOP_LEVEL_KEYS = new Set([
   'mode',
   'defaultFramework',
+  'autoDomains',
   'maxDraftChars',
   'maxResultChars',
   'maxOutputTokens',
@@ -66,6 +67,7 @@ export function readConfig(input = {}) {
 
   const config = {
     mode: requireEnum(input.mode ?? DEFAULT_CONFIG.mode, MODES, 'config.mode'),
+    autoDomains: requireBoolean(input.autoDomains ?? DEFAULT_CONFIG.autoDomains, 'config.autoDomains'),
     defaultFramework: requireString(
       input.defaultFramework ?? DEFAULT_CONFIG.defaultFramework,
       'config.defaultFramework',

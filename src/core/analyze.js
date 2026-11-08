@@ -1,4 +1,5 @@
 import { TASK_TYPES } from './constants.js'
+import { detectDomains } from './domains.js'
 import { freezeDeep, scriptCounts } from './utils.js'
 
 const TASK_KEYWORDS = Object.freeze({
@@ -26,6 +27,7 @@ export function analyzeDraft(draft) {
   const constraints = extractConstraints(text)
   const openQuestions = extractOpenQuestions(draft, task.type)
   const language = detectLanguage(text)
+  const domains = detectDomains(text)
   return freezeDeep({
     taskType: task.type,
     taskConfidence: task.confidence,
@@ -33,6 +35,7 @@ export function analyzeDraft(draft) {
     constraints,
     openQuestions,
     attachmentCount: draft.attachmentCount,
+    domains,
   })
 }
 

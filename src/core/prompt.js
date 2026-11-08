@@ -1,6 +1,7 @@
+import { describeDimensions, pickSlots } from './domains.js'
 import { freezeDeep } from './utils.js'
 
-export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultChars }) {
+export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultChars, domains }) {
   const instructions = [
     'You are a prompt enhancement engine for an AI coding and general-purpose assistant.',
     'Return one JSON object and no other text.',
@@ -9,6 +10,8 @@ export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultCha
     'The enhanced prompt must express only the intent already present in the draft, iteration feedback, or reference material.',
     'Sharpen, do not expand. You MAY expand each named action into the steps needed to carry it out, name the technical means that action necessarily requires (control lookup, error handling, retry, repeatability), and state an observable success condition. That is sharpening.',
     'You MUST NOT add features, objects, data, file names, URLs, versions, dependencies, or goals the draft did not mention. Test: could the user still say "that is exactly what I asked for"? If not, it is an addition.',
+    'One exception: you MAY require the executor to answer a dimension that a task of this kind cannot be carried out without, even when the draft left it implicit — but only as something to specify ("state which controller you chose and why"), never as a decision already made ("use an STM32F103"). Requiring an answer is sharpening; supplying the answer is invention. This exception licenses naming a dimension to be answered, never the parts, numbers, prices, or vendors that answer it.',
+    'Every stage or step you write must carry an observable pass condition: a number, a signal, or a visible state. "Stable", "fast", and "works well" are not pass conditions.',
     'Every action, object, and outcome named in the draft must survive into the enhanced prompt. Never drop one because a different section already mentions the topic, and never collapse several named actions into one.',
     'Preserve every protected item from the draft verbatim, including slash commands, file references, code spans, URLs, and versions.',
     'Write the enhanced prompt in the same natural language as the draft. Technical identifiers may remain in their original script.',
@@ -40,10 +43,17 @@ export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultCha
     }
   }
 
+  if (Array.isArray(domains) && domains.length > 0) {
+    // 领域清单只说要回答什么，不给出任何答案：型号、价格、厂商一律不写进来，
+    // 否则提示词就把一个猜测钉死了，用户还得反过来纠正。
+    instructions.push(`Task domain: ${domains.map(domain => domain.id).join(', ')}. A prompt for this domain cannot be executed until the executor answers the following. Fold the ones the draft leaves implicit into the enhanced prompt as requirements, phrased as what must be specified — do not answer them yourself.`)
+    for (const line of describeDimensions(domains, locale)) instructions.push(`- ${line}`)
+  }
+
   return instructions.join('\n')
 }
 
-export function buildUserPayload({ draft, analysis, framework, context, iteration, locale = 'en' }) {
+export function buildUserPayload({ draft, analysis, framework, context, iteration, locale = 'en', domains }) {
   const payload = {
     draft: draft.originalText,
     protectedItems: draft.protectedItems.map(item => ({ kind: item.kind, text: item.text })),
@@ -64,6 +74,18 @@ export function buildUserPayload({ draft, analysis, framework, context, iteratio
         guidance: pickLocalized(section.guidance, locale),
       })),
     },
+    domain: Array.isArray(domains) && domains.length > 0 ? {
+      ids: domains.map(domain => domain.id),
+      dimensionsToCover: domains.map(domain => ({
+        domain: domain.id,
+        items: domain.dimensions.map(dimension => ({
+          id: dimension.id,
+          text: pickLocalized(dimension, locale),
+          slots: pickSlots(dimension.slots, locale),
+        })),
+      })),
+      rule: 'Cover the ones the draft leaves implicit by requiring an answer. Do not answer them in the enhanced prompt.',
+    } : undefined,
     reference: context === undefined ? undefined : {
       projectAvailable: context.projectAvailable,
       files: context.files?.map(file => ({ id: file.id, path: file.path, content: file.content, truncated: file.truncated })) ?? [],

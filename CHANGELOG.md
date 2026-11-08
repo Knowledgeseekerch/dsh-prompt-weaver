@@ -4,6 +4,21 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.17] - 2026-11-08
+
+This release changes what the enhancer is able to ask for, not just how it phrases things.
+
+### Added
+
+- A domain library: six task domains (hardware, software, research, writing, operations, planning), each carrying the dimensions an executor has to answer and, under each dimension, the slots that answer must cover. A draft about building a smart car now demands the controller, the motors and their driver, the sensors, and the power supply — instead of asking for "the key parts" and letting the executor stay vague.
+- Domain bootstrapping: when a draft matches no built-in domain, the planner asks the model once which dimensions this kind of task cannot be executed without, then folds that list into the enhancement. Coverage is no longer bounded by the hand-written library. The answer is cached per draft, so a repeated run costs one model call, not two.
+- `config.autoDomains` (default on) turns bootstrapping off when the extra call is not wanted.
+
+### Changed
+
+- The enhancer may now require the executor to answer a dimension the draft left implicit — but only as something to specify ("state which controller you chose and why"), never as a decision already made ("use an STM32F103"). A planned dimension that names a product, model number, price, or vendor is dropped before it reaches the prompt, because pinning a guess into the prompt is worse than leaving the gap.
+- Every stage the enhancer writes must carry an observable pass condition: a number, a signal, or a visible state. "Stable", "fast", and "works well" are no longer accepted as one.
+
 ## [0.2.16] - 2026-11-08
 
 ### Changed
