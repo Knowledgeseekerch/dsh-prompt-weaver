@@ -4,6 +4,16 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.13] - 2026-11-08
+
+### Fixed
+
+- Every internal failure of the one-click path was reported as "the model could not enhance this prompt", including failures during write-back that happen after a successful enhancement. Write-back now has its own guard and its own message.
+
+### Changed
+
+- A failing run now names the stage: `[reason] …` for a business rejection, `rpc failed (…)` for a transport error, `write-back failed: …` when the result could not be applied, and `enhance failed: …` for anything else.
+
 ## [0.2.12] - 2026-11-08
 
 ### Fixed

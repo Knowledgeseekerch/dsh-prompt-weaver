@@ -781,7 +781,13 @@ window.__ModuleLoader__.load({
             return
           }
           if (violations === 0 && typeof inputActions?.setDraft === 'function') {
-            inputActions.setDraft(value.text)
+            try {
+              inputActions.setDraft(value.text)
+            } catch (error) {
+              // 写回阶段失败与「模型没增强出来」是两回事，必须分开报。
+              toastFn('error', `write-back failed: ${error?.message ?? String(error)}`.slice(0, 140))
+              return
+            }
             const scoreText = score === undefined ? '' : ` (${t('score')}: ${score})`
             const notes = assumptions === 0 ? '' : ` - ${assumptions} assumption(s)`
             toastFn('success', `${t('applied')}${scoreText}${notes}`)
@@ -794,8 +800,10 @@ window.__ModuleLoader__.load({
           setPendingResult(value)
           setOpen(true)
           toastFn('error', `${violations} violation(s) - review before applying`)
-        } catch {
-          toastFn('error', controller.signal.aborted ? 'Cancelled' : t('failed'))
+        } catch (error) {
+          toastFn('error', controller.signal.aborted
+            ? 'Cancelled'
+            : `enhance failed: ${error?.message ?? String(error)}`.slice(0, 140))
         } finally {
           if (abortRef.current === controller) abortRef.current = null
           setBusy(false)
