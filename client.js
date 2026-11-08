@@ -181,6 +181,16 @@ window.__ModuleLoader__.load({
   background: color-mix(in srgb, var(--dsw-alias-bg-overlay, #000) 72%, transparent);
   backdrop-filter: blur(4px);
 }
+.dsh-pw-button svg {
+  overflow: visible;
+}
+.dsh-pw-button:not(.is-busy) .dsh-pw-glow {
+  animation: dsh-pw-breathe 2.6s ease-in-out infinite;
+}
+@keyframes dsh-pw-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
 .dsh-pw-button.is-busy svg {
   animation: dsh-pw-spin 900ms linear infinite;
 }
@@ -298,23 +308,44 @@ window.__ModuleLoader__.load({
 }
 `
 
+    // 一个通着电的灯泡：玻璃泡发黄光，一圈光晕 + 五道散射光线。
+    // 固定用黄色而不是 currentColor——要的就是「亮着」这个信号，跟着主题色走就不亮了。
+    //
+    // 按 20px 设计（按钮 28px）。完整版带灯丝和三层光晕，缩到 18px 会糊成一个黄点；
+    // 这里去掉灯丝、光晕压成一层、光线加粗、底座减到两道——小图标得按小尺寸重画。
     function SparkleIcon() {
       return h('svg', {
-        viewBox: '0 0 20 20',
-        width: 16,
-        height: 16,
+        viewBox: '0 0 24 24',
+        width: 20,
+        height: 20,
         'aria-hidden': true,
         focusable: false,
+        overflow: 'visible',
       },
+      h('g', { className: 'dsh-pw-glow' },
+        h('circle', { cx: 12, cy: 9.6, r: 8.6, fill: '#FFC107', opacity: 0.18 })
+      ),
+      h('g', {
+        stroke: '#FFC107',
+        strokeWidth: 2,
+        strokeLinecap: 'round',
+        opacity: 0.9,
+      },
+      h('line', { x1: 12, y1: 0.6, x2: 12, y2: 2.8 }),
+      h('line', { x1: 4.2, y1: 4.2, x2: 5.6, y2: 5.6 }),
+      h('line', { x1: 19.8, y1: 4.2, x2: 18.4, y2: 5.6 }),
+      h('line', { x1: 1.2, y1: 9.6, x2: 3.4, y2: 9.6 }),
+      h('line', { x1: 22.8, y1: 9.6, x2: 20.6, y2: 9.6 })
+      ),
       h('path', {
-        d: 'M10 2.2l1.7 4.3 4.3 1.7-4.3 1.7L10 14.2 8.3 9.9 4 8.2l4.3-1.7z',
-        fill: 'currentColor',
+        d: 'M12 3.4a5.6 5.6 0 0 0-3.4 10c.4.4.7.9.7 1.5v.6h5.4v-.6c0-.6.3-1.1.7-1.5A5.6 5.6 0 0 0 12 3.4z',
+        fill: '#FFEB99',
+        stroke: '#FFB300',
+        strokeWidth: 1.6,
+        strokeLinejoin: 'round',
       }),
-      h('path', {
-        d: 'M15.4 12.6l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z',
-        fill: 'currentColor',
-        opacity: 0.6,
-      }))
+      h('rect', { x: 9.2, y: 16.1, width: 5.6, height: 1.9, rx: 0.9, fill: '#B0BEC5' }),
+      h('rect', { x: 9.8, y: 18.4, width: 4.4, height: 1.7, rx: 0.8, fill: '#78909C' }))
     }
 
     // 面板渲染一旦抛错，React 会把整棵子树卸掉——按钮就跟着消失了。
