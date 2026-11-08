@@ -4,6 +4,18 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.18] - 2026-11-08
+
+### Fixed
+
+- Right-clicking the enhancer button made the button disappear. The panel's full-screen overlay was rendered inside the composer slot, and a slot container that establishes a containing block collapses `position: fixed` to the button's own 28px box — so the overlay covered the button itself and nothing else. The panel is now portalled to `document.body`, with inline rendering as the fallback when `react-dom` is not reachable.
+- The panel is wrapped in an error boundary: a render failure now shows a readable message instead of tearing the button out of the composer.
+- The panel's background and text colours gained hard fallbacks, since a portalled node no longer inherits whatever the slot container defined.
+
+### Changed
+
+- The right-click entry point is gone. One button, left click only: a single click enhances, a double click opens the panel with the result. The right click was an extra entry point that only needed explaining.
+
 ## [0.2.17] - 2026-11-08
 
 This release changes what the enhancer is able to ask for, not just how it phrases things.

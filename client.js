@@ -3,6 +3,15 @@ window.__ModuleLoader__.load({
   factory(require) {
     const React = require('react')
     const { Toast } = require('@deepseek-ai/dsh-client-ui-primitives')
+    // 面板要挂到 body 上：slot 容器会捕获 position:fixed（祖先的 transform/contain），
+    // 不这样做全屏遮罩会被压进 28px 的按钮格子里，看起来就是「按钮变成了黑点」。
+    // 拿不到 react-dom 就退回内联渲染，至少不比原来更差。
+    let ReactDOM = null
+    try {
+      ReactDOM = require('react-dom')
+    } catch {
+      ReactDOM = null
+    }
     const h = React.createElement
     const NS = 'promptWeaver'
     const ENDPOINT = 'promptWeaver/enhance'
@@ -178,6 +187,7 @@ window.__ModuleLoader__.load({
 }
 .dsh-pw-panel {
   width: min(920px, 100%);
+  min-width: min(320px, 92vw);
   max-height: min(88vh, 900px);
   overflow: auto;
   display: flex;
@@ -186,8 +196,8 @@ window.__ModuleLoader__.load({
   padding: 16px;
   border-radius: 12px;
   border: 1px solid var(--dsw-alias-border-l2);
-  background: var(--dsw-alias-bg-base, var(--dsw-alias-bg-layer-2));
-  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-bg-base, var(--dsw-alias-bg-layer-2, #1c1c20));
+  color: var(--dsw-alias-label-primary, #ececf1);
   box-shadow: 0 18px 60px rgb(0 0 0 / 0.28);
 }
 .dsh-pw-row {
@@ -287,6 +297,40 @@ window.__ModuleLoader__.load({
         fill: 'currentColor',
         opacity: 0.6,
       }))
+    }
+
+    // 面板渲染一旦抛错，React 会把整棵子树卸掉——按钮就跟着消失了。
+    // 兜住它：渲染失败时显示一条可读的错误，按钮留在原地。
+    class PanelBoundary extends React.Component {
+      constructor(props) {
+        super(props)
+        this.state = { error: null }
+      }
+
+      static getDerivedStateFromError(error) {
+        return { error }
+      }
+
+      render() {
+        if (this.state.error === null) return this.props.children
+        return h('div', { className: 'dsh-pw-overlay' },
+          h('div', { className: 'dsh-pw-panel' },
+            h('strong', null, 'Prompt Weaver panel failed to render'),
+            h('pre', { className: 'dsh-pw-readonly' }, String(this.state.error?.message ?? this.state.error)),
+            h('button', {
+              type: 'button',
+              className: 'dsh-pw-button-control',
+              onClick: this.props.onClose,
+            }, 'Close')
+          ))
+      }
+    }
+
+    // 面板挂到 body：slot 容器会捕获 position:fixed，不这样做全屏遮罩
+    // 会被压进 28px 的按钮格子里，表现就是「按钮变成一个黑点」。
+    function renderOverlay(node) {
+      if (ReactDOM?.createPortal === undefined || typeof document === 'undefined') return node
+      return ReactDOM.createPortal(node, document.body)
     }
 
     function WeaverPanel(props) {
@@ -864,14 +908,25 @@ window.__ModuleLoader__.load({
           title: busy ? 'Cancel' : title,
           disabled,
           onMouseDown: event => event.preventDefault(),
-          onClick: runDirect,
-          onContextMenu: event => {
-            event.preventDefault()
-            setOpen(true)
+          // 左键承担全部：单击增强，双击看刚出来的结果 / 调参数。
+          // 右键不绑任何动作——原生上下文菜单本来也没用，绑了只是多一个要解释的入口。
+          onClick: event => {
+            if (event.detail >= 2) {
+              setOpen(true)
+              return
+            }
+            runDirect()
           },
+          onContextMenu: event => event.preventDefault(),
         }, h(SparkleIcon)),
         open
-          ? h(WeaverPanel, {
+          ? renderOverlay(h(PanelBoundary, {
+            onClose: () => {
+              setOpen(false)
+              setPendingResult(null)
+            },
+          },
+          h(WeaverPanel, {
             useInput,
             inputActions,
             sessionId,
@@ -884,7 +939,7 @@ window.__ModuleLoader__.load({
             },
             toast: toastFn,
             initialResult: pendingResult,
-          })
+          })))
           : null
       )
     }

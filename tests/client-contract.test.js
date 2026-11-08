@@ -42,3 +42,14 @@ test('the result panel shows assumptions and open questions instead of bare coun
   // openQuestions 是 { question, reason } 对象，直接 String() 会渲染成 [object Object]。
   assert.match(source, /openQuestionText\(/u)
 })
+
+test('the panel renders outside the composer slot and right click does nothing', () => {
+  // slot 容器会建立包含块，把 position:fixed 压成按钮的 28px 见方：
+  // 面板不挂到 body 上，全屏遮罩就会变成盖住按钮的一个黑点。
+  assert.match(source, /createPortal/u)
+  assert.match(source, /onContextMenu: event => event\.preventDefault\(\)/u)
+  assert.equal(/onContextMenu: event => \{\s*event\.preventDefault\(\)\s*setOpen/u.test(source), false)
+  // 渲染失败时由错误边界兜住，按钮不能跟着面板一起消失。
+  assert.match(source, /class PanelBoundary extends React\.Component/u)
+  assert.match(source, /getDerivedStateFromError/u)
+})
