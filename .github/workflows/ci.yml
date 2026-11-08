@@ -12,12 +12,17 @@ permissions:
 
 jobs:
   test:
-    name: Node ${{ matrix.node-version }}
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os }} / Node ${{ matrix.node-version }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         node-version: [22.19.0, 24.x]
+        exclude:
+          # Windows 只跑最新 LTS，覆盖面够用且省一半额度。
+          - os: windows-latest
+            node-version: 22.19.0
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,5 +47,7 @@ jobs:
       - name: Validate bundled frameworks
         run: npm run frameworks:validate
 
+      # pack:dry-run 的 npm cache 指向 /tmp，在 Windows 上没有这个路径。
       - name: Package dry run
+        if: runner.os == 'Linux'
         run: npm run pack:dry-run

@@ -1,6 +1,6 @@
 {
   "name": "dsh-prompt-weaver",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "description": "Framework-aware prompt enhancement plugin for DeepSeek Harness with original-intent preservation checks, context-aware iteration, and offline CLI.",
@@ -55,7 +55,7 @@
     "test:coverage": "node --test --experimental-test-coverage tests/*.test.js",
     "check": "node scripts/check.mjs",
     "lint": "node scripts/lint.mjs",
-    "cli:smoke": "node bin/dsh-prompt-weaver.js enhance --input examples/input/basic.txt --json >/dev/null && node bin/dsh-prompt-weaver.js frameworks list --config examples/config/dsh-prompt-weaver.config.json",
+    "cli:smoke": "node scripts/cli-smoke.mjs",
     "frameworks:validate": "node bin/dsh-prompt-weaver.js frameworks validate examples/frameworks",
     "pack:dry-run": "npm pack --dry-run --cache /tmp/dsh-prompt-weaver-npm-cache"
   },
