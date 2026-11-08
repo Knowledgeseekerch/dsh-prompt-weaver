@@ -706,6 +706,8 @@ window.__ModuleLoader__.load({
       const [busy, setBusy] = React.useState(false)
       const [pendingResult, setPendingResult] = React.useState(null)
       const abortRef = React.useRef(null)
+      const sessionIdRef = React.useRef(sessionId)
+      sessionIdRef.current = sessionId
 
       // 一键增强：不弹面板，点一下就跑，结果直接写回输入框。
       // 右键按钮仍可打开完整面板（差异对比、迭代、导入导出）。
