@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.12] - 2026-11-08
+
+### Fixed
+
+- `takePending` and `clearPending` were declared in the descriptor as `(agent, request)` but implemented as `(request)`, so the argument the host bound to `agent` was read as the request and the client key never arrived. A registry that validates the declared shape could also reject the plugin outright, which is consistent with enhance failing entirely. The signatures now match the declaration and still tolerate a single-argument call.
+- A failed one-click run reported only the generic message when the rpc layer rejected without a business error object; it now names the rejection shape (`rpc failed (TypeError: …)`).
+
 ## [0.2.11] - 2026-11-08
 
 ### Fixed

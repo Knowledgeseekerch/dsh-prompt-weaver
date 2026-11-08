@@ -84,9 +84,11 @@ export function createHostService({ ctx, config, frameworkStore, engine, logger 
       }
     },
 
-    async takePending(request) {
+    async takePending(agent, request) {
       try {
-        const clientKey = typeof request?.clientKey === 'string' ? request.clientKey : undefined
+        // descriptor 声明的参数顺序是 (agent, request)；兼容只有一个参数时直接当 request。
+        const payload = request ?? agent
+        const clientKey = typeof payload?.clientKey === 'string' ? payload.clientKey : undefined
         if (clientKey === undefined) return { ok: true, result: null }
         const entry = pending.get(clientKey)
         if (entry === undefined) return { ok: true, result: null }
@@ -98,9 +100,10 @@ export function createHostService({ ctx, config, frameworkStore, engine, logger 
       }
     },
 
-    async clearPending(request) {
+    async clearPending(agent, request) {
       try {
-        const clientKey = typeof request?.clientKey === 'string' ? request.clientKey : undefined
+        const payload = request ?? agent
+        const clientKey = typeof payload?.clientKey === 'string' ? payload.clientKey : undefined
         if (clientKey !== undefined) pending.delete(clientKey)
         return { ok: true }
       } catch (error) {

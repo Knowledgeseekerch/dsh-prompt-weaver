@@ -756,10 +756,17 @@ window.__ModuleLoader__.load({
             if (reason !== undefined && deterministic.has(reason)) break
           }
           if (value?.ok !== true) {
-            const message = typeof value?.message === 'string' && value.message.length > 0
-              ? value.message
-              : (lastError?.message || t('failed'))
             const reason = typeof value?.reason === 'string' ? value.reason : undefined
+            let message = typeof value?.message === 'string' && value.message.length > 0
+              ? value.message
+              : undefined
+            if (message === undefined) {
+              // 没有业务错误对象：说明 rpc 本身失败，把异常形态也带出来。
+              const raw = lastError === undefined
+                ? 'no response and no error'
+                : `${lastError?.name ?? typeof lastError}: ${lastError?.message ?? String(lastError)}`
+              message = `rpc failed (${raw.slice(0, 100)})`
+            }
             toastFn('error', reason === undefined ? message : `[${reason}] ${message}`)
             return
           }
