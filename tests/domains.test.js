@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { analyzeDraft } from '../src/core/analyze.js'
+import { assessCompleteness } from '../src/core/completeness.js'
 import { describeDimensions, detectDomains } from '../src/core/domains.js'
 import { parseMixedDraft } from '../src/core/draft.js'
 import { buildSystemPrompt, buildUserPayload } from '../src/core/prompt.js'
@@ -62,4 +63,45 @@ test('the user payload carries the domains and still holds no answers', () => {
 test('a draft with no domain signal stays without dimensions', () => {
   const domains = detectDomains('。')
   assert.deepEqual([...domains], [])
+})
+
+test('blocking gaps are confirmed, the rest become parameters with defaults', () => {
+  const text = '做一个智能小车，帮我出个方案'
+  const domains = detectDomains(text)
+  const completeness = assessCompleteness({ draft: { originalText: text }, domains, locale: 'zh' })
+  // 预告：这条断言依赖 hardware 探针的判定结果，如果探针把整句都判成已答，它会提前失效。
+  assert.ok(completeness.gaps.length > 0, 'expected the hardware draft to leave gaps')
+
+  const system = buildSystemPrompt({
+    mode: 'standard',
+    framework: undefined,
+    locale: 'zh',
+    maxResultChars: 4000,
+    domains,
+    completeness,
+  })
+  // 阻塞项仍要求跟用户确认。
+  assert.match(system, /block the definition/u)
+  // 非阻塞项明确不许变成提问，要折成带默认值的输入。
+  assert.match(system, /Do not turn them into questions/u)
+  assert.match(system, /input of the deliverable with a sensible default/u)
+  // 待确认总量有上限，否则一次增强能吐出十几条。
+  assert.match(system, /at most three items/u)
+})
+
+test('a software draft with no probes does not invent gaps', () => {
+  const text = '帮我写个 Python 脚本批量缩图'
+  const domains = detectDomains(text)
+  const completeness = assessCompleteness({ draft: { originalText: text }, domains, locale: 'zh' })
+  const system = buildSystemPrompt({
+    mode: 'standard',
+    framework: undefined,
+    locale: 'zh',
+    maxResultChars: 4000,
+    domains,
+    completeness,
+  })
+  // 没有探针就不该凭空造缺口，但仍然要按参数化规则办事。
+  assert.equal(system.includes('block the definition'), false)
+  assert.match(system, /could become an input of the deliverable/u)
 })

@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-11-08
+
+### Changed
+
+- A gap in the draft no longer becomes a question by default. `blocking` gaps are still confirmed with the user, but `important` and `optional` ones are folded into the result as inputs with defaults ("accept a `--max-size` flag, default 1920"; "unless stated, do not recurse into subdirectories"). A prompt for "batch-resize some images" used to come back with a dozen items marked "to be confirmed" and no way to start; it now carries one or two questions and a deliverable that takes the rest as parameters.
+- `openQuestions` is capped at three items, and only for values the task cannot be defined without. A value the deliverable can accept as an input is not a question.
+- `assumptions` now carries the defaults adopted for non-blocking gaps, phrased as premises the user can override.
+- The domain block in the system prompt says the same thing: fold an implicit dimension into the result as an input with a default, and require confirmation only when the task cannot be stated at all without it.
+
 ## [0.3.0] - 2026-11-08
 
 This release moves the enhancer from "ask every dimension" to "ask what is still missing". It also adds the mechanical-engineering domain, which the existing hardware domain could not cover: a bracket and a servo board share almost no required answers.
