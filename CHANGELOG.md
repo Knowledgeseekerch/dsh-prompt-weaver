@@ -4,6 +4,21 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-11-08
+
+Five changes, all of them about not making the user do the tool's work.
+
+### Changed
+
+- The `general` framework no longer pushes a missing verification into "open questions". `validation` now requires an executable check — a command, an assertion, or an exit code — and falls back to the conventional one for the task. The `open-questions` section is retitled "assumptions and defaults" and leads with overridable defaults instead of interrogating the user.
+- A context domain with no registered probe is reported as `unprobed` rather than "no gaps". The panel says "no check rules for this domain yet" instead of implying the requirements were satisfied.
+
+### Fixed
+
+- `maxTotalBytes` only ever trimmed files: the project tree and the conversation went in whole, so the two together could exceed the budget and push the remaining allowance negative. Tree now gets 20% of the budget, the conversation 40%, and files take the rest; an over-quota conversation is dropped from its oldest end.
+- The CLI read its `--context` file down a private path — it redacted the same text twice (once for the content, once again just to count redactions) and applied no budget at all. It now shares `fitBudget` with the host.
+- `locale/en.json` and `locale/zh.json` held seven keys, all a subset of the inline dictionary, and nothing read them. They are gone. A contract test keeps the `en` and `zh` key sets identical, so a new string cannot land on one side only.
+
 ## [0.3.1] - 2026-11-08
 
 ### Changed

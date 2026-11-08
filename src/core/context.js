@@ -269,7 +269,7 @@ function renderTree({ rootDisplay, directories, files, config }) {
   return entries.slice(0, config.context.maxTreeEntries)
 }
 
-function fitBudget({ files, tree, conversation, config }) {
+export function fitBudget({ files, tree, conversation, config }) {
   const total = config.context.maxTotalBytes
   // 以前只裁 files，tree 与 conversation 原样带出去：
   // 两者相加超过 maxTotalBytes 时 remaining 直接变负，上限形同虚设。

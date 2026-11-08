@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
+import { rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
@@ -57,4 +59,23 @@ test('CLI compare prints a deterministic report', () => {
   const result = runCli(['compare', 'examples/input/basic.txt', 'examples/input/basic.txt'])
   assert.equal(result.status, 0, result.stderr)
   assert.match(result.stdout, /delta/u)
+})
+
+test('CLI context honours the same byte budget as the host', () => {
+  // 以前 CLI 自己读 context.json、自己脱敏，绕过了 maxTotalBytes：
+  // 一份 40KB 的文件加 40KB 的会话会原样送进引擎。
+  const file = join(tmpdir(), `weaver-context-${process.pid}-${Date.now()}.json`)
+  writeFileSync(file, JSON.stringify({
+    files: [{ path: 'src/a.ts', content: 'x'.repeat(40000) }],
+    conversation: [{ role: 'user', text: 'y'.repeat(40000) }],
+    tree: Array.from({ length: 400 }, (_, index) => `dir${index}/`),
+  }))
+  try {
+    const result = runCli(['enhance', '--input', 'examples/input/basic.txt', '--context', file, '--json'])
+    assert.equal(result.status, 0, result.stderr)
+    const payload = JSON.parse(result.stdout)
+    assert.ok(payload.context.totalBytes <= 16384, `context total ${payload.context.totalBytes} exceeded the default budget`)
+  } finally {
+    rmSync(file, { force: true })
+  }
 })

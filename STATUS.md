@@ -8,10 +8,14 @@
 |---|---|
 | 源码 | `D:\AI\agent\2026-11-07-23-53-35\dsh-prompt-weaver` |
 | 本地安装方式 | junction：`~/.dsh/profiles/desktop/node_modules/dsh-prompt-weaver` 直连源码 |
-| 已发布版本 | `v0.3.1`（远端最新 tag） |
+| 已发布版本 | `v0.3.2`（远端最新 tag） |
 | 未发布提交 | 无 |
-| 测试 | 129 项全过 |
-| 静态检查 | `node scripts/check.mjs`（52 JS / 11 JSON）与 `scripts/lint.mjs`（85 文件）通过 |
+| 测试 | 133 项全过 |
+| 静态检查 | `node scripts/check.mjs`（52 JS / 10 JSON）与 `scripts/lint.mjs`（84 文件）通过 |
+
+**市场索引**：仓库根的 `market-index.json` 是给 DSH 官方「插件 → 发现 → 索引源」用的 format 1 索引，条目指向本仓库的 Git commit。索引 URL 走 gh-proxy 包装（raw 与 jsDelivr 在本机被重置），发版后要同步更新其中的 `version` 与 `commit`，否则市场显示的仍是旧版本。第三方 dshmarket 不读它——它只认 awesome-dsh-plugin 的精选目录。
+
+**能力变更（0.3.2）**：五处「别让用户替工具干活」的修补。框架的 `validation` 不再把缺失的验收推成待确认（必须给命令/断言/退出码）；没探针的领域标 `unprobed` 而非「无缺口」；`maxTotalBytes` 终于约束住 tree（20%）与会话（40%）；CLI 的 `--context` 与宿主共用 `fitBudget` 且只脱敏一次；删掉无人读取的 `locale/*.json` 残片，内联字典成为唯一文案源（有契约测试锁住 en/zh 键一致）。
 
 **能力变更（0.3.1）**：缺口不再一律变成"待确认"。`blocking` 仍要跟用户确认，`important`/`optional` 折成带默认值的输入（如「支持 `--max-size`，默认 1920」）。`openQuestions` 上限 3 条，只放"没有它任务就无法表述"的值。起因是一次对照：同一句「批量缩图」，本地插件吐出十几处待确认导致执行方动不了手，WorkBuddy 只写 145 字却把尺寸/质量/命名全部参数化、可直接开工。缺的是「把不确定转成参数」这一手，不是「把不确定还给用户」。
 

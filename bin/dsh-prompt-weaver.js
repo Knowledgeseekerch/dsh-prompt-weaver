@@ -4,6 +4,7 @@ import { join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 
 import { readConfig } from '../src/core/config.js'
+import { fitBudget } from '../src/core/context.js'
 import { createFrameworkStore, validateFramework } from '../src/core/frameworks.js'
 import { createPromptWeaverEngine } from '../src/core/engine.js'
 import { createLocalModelProvider } from '../src/core/local-provider.js'
@@ -176,7 +177,7 @@ async function runEnhance(positionals, values, config, frameworkStore) {
   }
   if (text.trim().length === 0) return usageError('enhance requires text or --input <file>')
 
-  const explicitContext = values.context === undefined ? undefined : readContext(values.context)
+  const explicitContext = values.context === undefined ? undefined : readContext(values.context, config)
   const engine = createPromptWeaverEngine({
     config,
     frameworkStore,
@@ -221,32 +222,54 @@ function loadConfig(path) {
   return readConfig(safeJsonParse(readFileSync(resolve(path), 'utf8'), 'config file'))
 }
 
-function readContext(path) {
+function readContext(path, config) {
   const parsed = safeJsonParse(readFileSync(resolve(path), 'utf8'), 'context file')
-  const files = Array.isArray(parsed.files) ? parsed.files : []
-  const conversation = Array.isArray(parsed.conversation) ? parsed.conversation : []
-  const redactedFiles = files.map(file => ({
-    id: file.id ?? `file:${file.path}`,
-    path: String(file.path ?? ''),
-    content: redactSecrets(String(file.content ?? ''), 200).text,
-    truncated: Boolean(file.truncated),
-  }))
-  const redactedConversation = conversation.map(message => ({
-    role: String(message.role ?? 'user'),
-    text: redactSecrets(String(message.text ?? ''), 200).text,
-  }))
+  const rawFiles = Array.isArray(parsed.files) ? parsed.files : []
+  const rawConversation = Array.isArray(parsed.conversation) ? parsed.conversation : []
+
+  // 脱敏只扫一遍：以前拿到 text 后，为了统计 redactions 又把同一段扫了第二次。
+  const scannedFiles = rawFiles.map(file => {
+    const result = redactSecrets(String(file.content ?? ''), config.privacy.maxRedactions)
+    return {
+      id: file.id ?? `file:${file.path}`,
+      path: String(file.path ?? ''),
+      content: result.text,
+      truncated: Boolean(file.truncated),
+      redactions: result.redactions,
+    }
+  })
+  const scannedConversation = rawConversation.map(message => {
+    const result = redactSecrets(String(message.text ?? ''), config.privacy.maxRedactions)
+    return { role: String(message.role ?? 'user'), text: result.text, redactions: result.redactions }
+  })
   const tree = Array.isArray(parsed.tree) ? parsed.tree.map(String) : []
+
+  // 与宿主侧共用同一套预算：CLI 走另一条读取路径，不该因此绕过 maxTotalBytes。
+  const fitted = fitBudget({
+    files: scannedFiles.map(file => ({
+      id: file.id,
+      path: file.path,
+      content: file.content,
+      truncated: file.truncated,
+    })),
+    tree,
+    conversation: scannedConversation,
+    config,
+  })
+
+  const redactions = [
+    ...scannedFiles.flatMap(file => file.redactions),
+    ...scannedConversation.flatMap(message => message.redactions),
+  ]
+  const conversation = fitted.conversation.map(message => ({ role: message.role, text: message.text }))
   return {
     projectAvailable: true,
-    files: redactedFiles,
-    tree,
-    conversation: redactedConversation,
-    conversationMessages: redactedConversation.length,
-    redactions: [
-      ...redactedFiles.flatMap(file => redactSecrets(file.content, 1).redactions),
-      ...redactedConversation.flatMap(message => redactSecrets(message.text, 1).redactions),
-    ],
-    totalBytes: measureContext(redactedFiles, tree, redactedConversation),
+    files: fitted.files,
+    tree: fitted.tree,
+    conversation,
+    conversationMessages: conversation.length,
+    redactions: redactions.slice(0, config.privacy.maxRedactions),
+    totalBytes: measureContext(fitted.files, fitted.tree, conversation),
   }
 }
 
