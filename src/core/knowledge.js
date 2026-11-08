@@ -190,7 +190,7 @@ export const TOPIC_CONVENTIONS = Object.freeze([
     id: 'auth',
     match: Object.freeze(['登录', '密码', 'login', 'password', 'session', '会话', '鉴权', '认证', '注册']),
     zh: Object.freeze([
-      '密码只存哈希（bcrypt／argon2），不存明文也不做可逆加密',
+      '密码只存哈希；优先用框架自带的实现（Flask 的 werkzeug.security），确需更强算法再加 bcrypt／argon2，并写进依赖清单',
       '登录失败统一提示，不区分「用户不存在」与「密码错误」，避免账号枚举',
       '会话密钥从环境变量读；输入校验必须放在服务端',
     ]),

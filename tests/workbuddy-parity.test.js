@@ -115,6 +115,9 @@ test('the prompt carries conventional decisions, not only the questions', () => 
   const software = systemFor('用 Flask 做一个登录页')
   assert.match(software, /bcrypt/u)
   assert.match(software, /服务端/u)
+  // 哈希选型必须与「不新增依赖」自洽：优先框架自带，而不是并列一个要额外安装的库。
+  assert.match(software, /werkzeug\.security/u)
+  assert.match(software, /写进依赖清单/u)
 
   const diagnosis = systemFor('电脑蓝屏了怎么排查')
   assert.match(diagnosis, /停止码/u)

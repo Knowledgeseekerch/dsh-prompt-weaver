@@ -4,6 +4,15 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - 2026-11-08
+
+Two things a real enhanced prompt exposed when it was read line by line.
+
+### Fixed
+
+- The auth convention listed bcrypt and argon2 next to the software domain's rule "do not add dependencies the draft did not mention". A Flask login page therefore came back demanding a password hash from a library the same prompt forbade installing. It now prefers the framework's own implementation (`werkzeug.security`), and names a stronger library only when that is justified and written into the manifest.
+- A one-sentence request was expanded with the ceremony of a production system: dependency manifest, five-module split, idempotency section, port-conflict handling. A scale rule now keeps the structure and drops the ceremony — engineering weight is added when the draft asks for production use, multiple users, or deployment.
+
 ## [0.5.1] - 2026-11-08
 
 Two fixes a real run exposed, plus the domain everyday work actually needs.
