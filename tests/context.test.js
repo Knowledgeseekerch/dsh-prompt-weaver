@@ -148,3 +148,28 @@ test('PowerShell scripts are indexed as text files', async () => {
   assert.equal(context.files.length, 1)
   assert.equal(context.files[0].path, '/repo/scripts/deploy.ps1')
 })
+
+test('the total budget bounds conversation and tree too, not just files', async () => {
+  // 一条远超配额的用户消息：以前只裁 files，它会整条带进上下文把总量顶穿。
+  const session = {
+    header: { cwd: '/repo' },
+    events: [{
+      type: 'user/message',
+      data: { source: { kind: 'user' }, content: [{ type: 'text', text: 'x'.repeat(3000) }] },
+    }],
+    snapshotEvents() {
+      return this.events
+    },
+  }
+  const config = readConfig({ context: { maxTotalBytes: 4096 } })
+  const context = await collectContext({
+    fs: createFsFixture(),
+    root: '/repo',
+    session,
+    draft: parseMixedDraft('fix the login button'),
+    config,
+  })
+  assert.ok(context.totalBytes <= 4096, `context total ${context.totalBytes} exceeded the budget`)
+  // 3000 字符超过会话配额（总预算的 40%），整条被丢掉而不是原样带出去。
+  assert.equal(context.conversation.length, 0)
+})

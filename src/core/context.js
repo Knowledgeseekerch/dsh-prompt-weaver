@@ -270,9 +270,31 @@ function renderTree({ rootDisplay, directories, files, config }) {
 }
 
 function fitBudget({ files, tree, conversation, config }) {
-  const treeBytes = tree.join('\n').length
-  const conversationBytes = conversation.reduce((sum, message) => sum + message.text.length, 0)
-  let remaining = config.context.maxTotalBytes - treeBytes - conversationBytes
+  const total = config.context.maxTotalBytes
+  // 以前只裁 files，tree 与 conversation 原样带出去：
+  // 两者相加超过 maxTotalBytes 时 remaining 直接变负，上限形同虚设。
+  // 现在三样各有配额，files 只吃剩下的。
+  const treeBudget = Math.floor(total * 0.2)
+  const conversationBudget = Math.floor(total * 0.4)
+
+  const fittedTree = []
+  let treeBytes = 0
+  for (const entry of tree) {
+    const cost = entry.length + 1
+    if (treeBytes + cost > treeBudget) break
+    fittedTree.push(entry)
+    treeBytes += cost
+  }
+
+  let messages = conversation.slice(0, config.maxConversationMessages)
+  let conversationBytes = messages.reduce((sum, message) => sum + message.text.length, 0)
+  // 超配额就从最旧的一端丢：越近的对话对当前请求越有用。
+  while (messages.length > 0 && conversationBytes > conversationBudget) {
+    conversationBytes -= messages[0].text.length
+    messages = messages.slice(1)
+  }
+
+  let remaining = total - treeBytes - conversationBytes
   const fittedFiles = []
   for (const file of files) {
     if (remaining <= 0) break
@@ -281,7 +303,7 @@ function fitBudget({ files, tree, conversation, config }) {
     fittedFiles.push({ ...file, content, truncated: file.truncated || content.length < file.content.length })
     remaining -= content.length
   }
-  return { files: fittedFiles, tree, conversation: conversation.slice(0, config.maxConversationMessages) }
+  return { files: fittedFiles, tree: fittedTree, conversation: messages }
 }
 
 function measureContextBytes(context) {
