@@ -4,6 +4,38 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-11-08
+
+A coverage release. 0.3.3 could recognise "this looks like a diagnostics task" and then measure nothing, because only two of nine domains had probes. That gap is closed: every built-in domain now answers "what did the user leave out", and two high-frequency domains were missing entirely.
+
+### Added
+
+- A `diagnosis` domain (6 dimensions, 14 slots): the symptom in the user's own words, its standard name or error code, what has already been ruled out and on what evidence, where the evidence lives, the environment snapshot, and whether it reproduces. "电脑蓝屏了怎么排查" reached no domain at all before — the completeness check went quiet on exactly the kind of draft 0.3.3 had just written diagnostic rules for.
+- A `data` domain (5 dimensions, 12 slots): inputs and encoding, field types and missing values, the join key and unmatched handling, the duplicate rule and which record wins, the output target and the number that must reconcile. "把这三个 csv 合成一张表" reached no domain either.
+- Probes for the five domains that only had dimensions: `software`, `research`, `writing`, `operations`, and `plan`. Every entry that reaches a domain is now judged; none falls back to `unprobed`.
+- **Domain work breakdowns** (`src/core/blueprints.js`). Each domain carries the skeleton a complete answer follows — for hardware: parts and why → wiring and pins → power and levels → initialisation order → loop and period → raw reading to physical value (calibration, compensation) → filter and limits → acceptance measurement → error budget. The prompt uses it as the default structure, so a thin draft gets an executable shape instead of a slightly shorter list of questions. The skeleton states order and coverage only; it never picks a part or a number.
+- Acquisition and drive dimensions for `hardware`: `sensing` (signal conditioning, sampling and resolution, calibration and linearisation, compensation, filtering), `actuation` (drive method, power device, duty or frequency, protection), and `error-budget`. These are the elements a sensor or heater task lives or dies on, and none of them was named before.
+- `diagnosis.isolation`: safe mode or a clean boot, a control comparison, and memory and disk health checks — the three moves a software-to-hardware escalation actually consists of.
+- `software.security`: input validation, credentials and sessions, permission boundary; `data` gained column alignment across sources and row reconciliation (inputs total = output rows + removed rows).
+- The corpus grew from 49 to 61 entries. Five are the requests whose strong answers this enhancer is now measured against (thermocouple acquisition, Flask login, PID heating, three-way CSV merge, blue-screen triage); the rest are mechanical, data, diagnostic and script samples that previously reached no domain or reached one with no probes.
+
+### Changed
+
+- A blocking gap is no longer turned into a question first. When a convention exists, the enhancer adopts it, states it together with its basis, and marks it replaceable ("K-type thermocouple, the common default for this range — swap in the type you actually have"). It asks only when the choice changes the shape of the deliverable and no convention exists. An overridable default is the better answer: the user should get three questions and a deliverable, not eleven questions and none.
+
+- `hardware.parts` recognises controller model numbers (STM32, ESP32, Arduino, Raspberry Pi, GD32, ATmega, nRF). "用 STM32 读热电偶" used to score 0% coverage and then demand that the user state the controller they had just stated.
+- `mechanical.geometry` accepts "8mm 厚" as the same fact as "板厚 8". The two phrasings of one sentence scored 0.14 and 0.09.
+- The software keyword list carries the stack words people actually type (python, flask, django, pandas, react, 爬虫, 前端, 登录页); the writing list carries the polishing words (摘要, 润色, 学术); the data list carries 清单. "用 Flask 做一个登录页" used to land in `operations` because "登录" matched there and nothing matched `software`.
+- A negative constraint ("不要旋转", "avoid X") must now be checked by meaning rather than by a keyword blacklist: the prompt requires the executor to list the imagery each approach actually uses and to state whether it belongs to the forbidden family, because "no rotation" is bypassed by "spiral", "swirl", or "a full turn".
+- CI runs on Windows as well as Ubuntu. Package dry-run stays on Linux only: its npm cache path is `/tmp`.
+
+### Fixed
+
+- A stream that ended without a `finish` event was accepted whenever it had produced text, so a cut connection could write a half-finished prompt back into the composer. It now fails with a retryable `model-failed`.
+- Cancellation was recognised only as `AbortError` / `ABORT_ERR`. `CanceledError`, `ERR_CANCELED`, `ERR_ABORTED`, and `DOMException` code 20 were all reported as model failures.
+- `cli:smoke` ended with `>/dev/null`, which does not exist on Windows. Adding the Windows CI job surfaced it immediately; it is now a cross-platform script that also asserts the command produced output.
+- The README claimed assumptions were rejected (they are the field that carries defaults since 0.3.1), carried two different test counts (52 and 83), and said the plugin had never run against a live DSH release. The compatibility document repeated the same stale claim and still described the old sparkle button.
+
 ## [0.3.3] - 2026-11-08
 
 Five changes, each one closing a gap a real side-by-side comparison exposed.

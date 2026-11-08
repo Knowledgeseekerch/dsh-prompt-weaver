@@ -7,8 +7,9 @@ It is designed to work as a DSH Web bundle and as a zero-dependency offline CLI.
 ## Highlights
 
 - **Mixed drafts are supported.** `/command`, `@file`, `src/app.ts`, URLs, and versions are detected as protected items. Only a bare slash command is rejected.
-- **Original-intent gate.** The engine rejects an enhanced prompt if it loses a protected item, an original constraint, or the draft language.
-- **No unverified assumptions.** Model output that declares assumptions is rejected instead of silently replacing the draft.
+- **Original-intent gate.** A deterministic quality pass reports when an enhanced prompt loses a protected item, an original constraint, or the draft language. Violations are surfaced to the panel; the model's text is still delivered, so a heuristic never costs you the result.
+- **Assumptions surfaced, never swallowed.** A gap that does not block the task becomes a parameter with a default, and the result carries it in an explicit `assumptions` list. `strict` mode still refuses assumptions outright.
+- **Completeness check.** A rule-based pass judges how many of a domain's required slots the draft has actually answered, triages the gaps into blocking / important / optional, and calls no model — the same draft always yields a byte-identical report, so the report doubles as an acceptance baseline. Nine domains are covered: hardware, software, mechanical, data, diagnosis, research, writing, operations, and plan.
 - **Framework library.** Built-in general, concise, engineering, debugging, review, testing, research, and writing frameworks; custom frameworks can be imported, exported, and selected.
 - **Context awareness with budgets.** The Host can sample project files and recent user messages under strict byte, file, depth, and message limits.
 - **Privacy by default.** Secrets are redacted in context, high-confidence secrets in drafts block enhancement, assistant messages are excluded unless explicitly enabled, and nothing is auto-sent or persisted by the plugin.
@@ -27,15 +28,15 @@ Compared with the public `dsh-prompt-enhance` bundle used as a compatibility ref
 - **Deterministic quality metrics**, before/after comparison, diff summary, and bounded multi-round feedback.
 - **More explicit privacy controls**, including sensitive-draft blocking, context redaction, metadata-only results, and no enhancement-history persistence.
 - **A zero-dependency CLI** for offline enhancement, comparison, framework/config management, and reproducible test workflows.
-- **Publishable project hygiene**: schemas, examples, compatibility documentation, security policy, CI, release workflow, and 52 automated tests.
+- **Publishable project hygiene**: schemas, examples, compatibility documentation, security policy, CI on Ubuntu and Windows, release workflow, and 148 automated tests.
 
 This is not a claim that one model or prompt style is universally superior. The plugin's quality metrics measure preservation and structure; actual enhancement quality still depends on the selected model and context.
 
 ## Status
 
-- Core engine, Host service, Web composer control, CLI, examples, and 83 automated tests are included.
-- The original-intent gate, mixed-draft parser, framework store, config import/export, privacy handling, context collector, and Host/LLM integration are covered by tests.
-- Compatibility was implemented against the public plugin API shape used by existing DSH bundles and the official Web input contract (`draft`, `phase`, `occurrences`, `attachmentIds`). It has **not** yet been smoke-tested against a live DSH release; see [docs/compatibility.md](docs/compatibility.md).
+- Core engine, Host service, Web composer control, CLI, examples, and 148 automated tests are included.
+- The original-intent gate, mixed-draft parser, framework store, config import/export, privacy handling, context collector, completeness checker, and Host/LLM integration are covered by tests.
+- Compatibility was implemented against the public plugin API shape used by existing DSH bundles and the official Web input contract (`draft`, `phase`, `occurrences`, `attachmentIds`). It runs inside this project's own DSH profile day to day, so the Host seam, write-back path, and panel are exercised against a live release; see [docs/compatibility.md](docs/compatibility.md).
 
 ## Requirements
 

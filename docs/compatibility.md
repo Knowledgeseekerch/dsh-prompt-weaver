@@ -4,7 +4,7 @@
 
 This plugin targets the **DeepSeek Harness developer-preview Web profile** and the DSH bundle/Typert Remote model used by current community Host + Web composer plugins. It is not a model provider and does not depend on the concrete agent loop implementation.
 
-No exact DSH release has been certified yet. Treat the first live-install smoke test as the compatibility gate.
+The plugin is installed in a live DSH desktop profile and has run there across the 0.2.x–0.4.0 line. The Host RPC, composer write-back, panel rendering, framework list, and config import/export have all been exercised against a real release. The exact DSH build is not pinned, so the checklist below still governs any claim about a specific release.
 
 ## Verified against
 
@@ -26,10 +26,10 @@ The automated Host test uses in-memory service doubles for these seams and valid
 
 | Component | Status |
 |---|---|
-| DSH Web profile / composer slots | Designed and mock-tested; live install pending |
-| Host Typert Remote `enhance` RPC | Designed and mock-tested; live RPC pending |
-| `ctx.llm.stream` model seam | Designed and mock-tested; live provider pending |
-| `ctx.fs` / `workingDirectory` / `agentDefaultModel` | Designed and mock-tested; live Host pending |
+| DSH Web profile / composer slots | Live-verified in the author's profile |
+| Host Typert Remote `enhance` RPC | Live-verified |
+| `ctx.llm.stream` model seam | Live-verified |
+| `ctx.fs` / `workingDirectory` / `agentDefaultModel` | Live-verified; context collection runs against a real project |
 | Headless / SDK / ACP profiles | Not targeted by the composer control |
 | DSH versions before the current Typert/bundle model | Not supported |
 
@@ -39,7 +39,7 @@ Run this before publishing a compatibility claim for a specific DSH release:
 
 1. Start or install DSH and note the exact version and commit.
 2. Install the cloned bundle through the plugin manager, not by editing profile files manually.
-3. Refresh the Web client and confirm the sparkle button appears in the composer tool row.
+3. Refresh the Web client and confirm the bulb button appears in the composer tool row.
 4. Enhance a plain draft, a `/command + text` draft, a draft with `@file`, and a draft with an attachment.
 5. Confirm the slash command and file references remain, attachments are not cleared, and no message is sent automatically.
 6. Inspect Host logs/RPC for a `promptWeaver/enhance` failure if the button does not work.
