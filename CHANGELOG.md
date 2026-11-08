@@ -4,6 +4,18 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.9] - 2026-11-08
+
+### Added
+
+- Enhancement results survive a session switch. The host keeps the last eight results keyed by the client's session key for ten minutes; when a composer mounts and finds a stored result it opens the panel with it, so leaving a session mid-request no longer throws the work away.
+- `promptWeaver/takePending` and `promptWeaver/clearPending` expose that store. A successful write-back clears its own entry, so returning to the session does not reopen the same result.
+- `tests/pending-results.test.js`: take-once semantics, per-session keys, clear, and the no-key case.
+
+### Changed
+
+- The desktop button no longer blocks on the assumption count alone (0.2.7) and, from this release, a result produced while the composer was unmounted is kept rather than discarded.
+
 ## [0.2.8] - 2026-11-08
 
 ### Fixed

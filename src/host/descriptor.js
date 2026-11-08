@@ -14,6 +14,8 @@ export function createTypertDescriptor() {
       invocation('listFrameworks'),
       invocation('importConfig'),
       invocation('exportConfig'),
+      invocation('takePending'),
+      invocation('clearPending'),
     ],
   })
 }

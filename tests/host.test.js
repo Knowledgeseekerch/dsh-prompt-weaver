@@ -110,7 +110,7 @@ test('host plugin registers the service and Remote descriptor', () => {
   assert.equal(state.provided.has('promptWeaver'), true)
   assert.equal(state.typert.package, 'dsh-prompt-weaver')
   assert.equal(state.typert.face, 'host')
-  assert.equal(state.typert.invocations.length, 4)
+  assert.equal(state.typert.invocations.length, 6)
   assert.equal(state.typert.invocations[0].id, 'dsh-prompt-weaver#promptWeaver/enhance')
   assert.equal(state.typert.invocations[0].namespace, 'promptWeaver')
   assert.equal(state.typert.invocations[0].parameters[0].lookup, 'agent')

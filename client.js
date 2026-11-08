@@ -9,6 +9,8 @@ window.__ModuleLoader__.load({
     const LIST_ENDPOINT = 'promptWeaver/listFrameworks'
     const IMPORT_ENDPOINT = 'promptWeaver/importConfig'
     const EXPORT_ENDPOINT = 'promptWeaver/exportConfig'
+const TAKE_PENDING_ENDPOINT = 'promptWeaver/takePending'
+const CLEAR_PENDING_ENDPOINT = 'promptWeaver/clearPending'
     const MAX_HISTORY = 5
     const MAX_IMPORT_CHARS = 1024 * 1024
 
@@ -312,6 +314,23 @@ window.__ModuleLoader__.load({
         setBusy(false)
         abortRef.current = null
       }, [sessionId])
+
+      // 取回「请求完成时组件已被卸载」的结果：切走再切回来仍能看到并应用。
+      React.useEffect(() => {
+        if (rpc === undefined || sessionId === undefined) return undefined
+        let cancelled = false
+        rpc.call('/api', TAKE_PENDING_ENDPOINT, {
+          args: { agentId: sessionId, request: { clientKey: sessionId } },
+        })
+          .then((response) => {
+            const value = response?.value ?? response
+            if (cancelled || value?.ok !== true || value.result == null) return
+            setPendingResult(value.result)
+            setOpen(true)
+          })
+          .catch(() => {})
+        return () => { cancelled = true }
+      }, [rpc, sessionId])
       const fileInputRef = React.useRef(null)
 
       React.useEffect(() => {
@@ -722,6 +741,7 @@ window.__ModuleLoader__.load({
                     command: requestBase.command,
                     occurrences: requestBase.occurrences,
                     attachmentCount: requestBase.attachmentCount,
+                    clientKey: sessionId,
                   },
                 },
               }, controller.signal)
@@ -756,6 +776,10 @@ window.__ModuleLoader__.load({
             const scoreText = score === undefined ? '' : ` (${t('score')}: ${score})`
             const notes = assumptions === 0 ? '' : ` - ${assumptions} assumption(s)`
             toastFn('success', `${t('applied')}${scoreText}${notes}`)
+            // 已经写回当前会话，清掉暂存，避免切回来时又弹出同一份结果。
+            void Promise.resolve(rpc.call('/api', CLEAR_PENDING_ENDPOINT, {
+              args: { agentId: sessionId, request: { clientKey: sessionId } },
+            })).catch(() => {})
             return
           }
           setPendingResult(value)

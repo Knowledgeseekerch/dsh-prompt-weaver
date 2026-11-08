@@ -5,18 +5,44 @@ import { PromptWeaverError } from '../core/errors.js'
 import { normalizeError } from '../core/errors.js'
 import { currentScope, runWithScope } from './request-scope.js'
 
+const PENDING_TTL_MS = 10 * 60 * 1000
+const PENDING_LIMIT = 8
+
 export function createHostService({ ctx, config, frameworkStore, engine, logger }) {
+  /** 按 clientKey 暂存尚未被前端取走的增强结果。 */
+  const pending = new Map()
+
+  function rememberPending(clientKey, result) {
+    pending.set(clientKey, { result, at: Date.now() })
+    while (pending.size > PENDING_LIMIT) {
+      const oldest = pending.keys().next().value
+      pending.delete(oldest)
+    }
+  }
+
   const service = {
     async enhance(agent, request, signal) {
       try {
         if (agent?.session === undefined) {
           throw new PromptWeaverError('unavailable', 'No live session is attached to this request.')
         }
+        // clientKey 只用于结果暂存，engine 不认识它，先剥掉。
+        const clientKey = typeof request?.clientKey === 'string' ? request.clientKey : undefined
+        const payload = { ...request }
+        delete payload.clientKey
+
         // 每个请求在自己的作用域里执行：并发时不会互相覆盖 session。
-        return await runWithScope({ agent, session: agent.session }, async () => {
-          const result = await engine.enhance(request ?? {}, { signal })
+        const outcome = await runWithScope({ agent, session: agent.session }, async () => {
+          const result = await engine.enhance(payload, { signal })
           return { ok: true, ...result }
         })
+
+        // 前端组件可能在请求返回前就被卸载（切换会话）。
+        // 先存一份，写回成功后由 client 清除；没清除的等下次挂载取回。
+        if (clientKey !== undefined && outcome.ok === true) {
+          rememberPending(clientKey, outcome)
+        }
+        return outcome
       } catch (error) {
         const normalized = normalizeError(error)
         logger?.warn?.('dsh-prompt-weaver enhance failed:', normalized.reason)
@@ -55,6 +81,30 @@ export function createHostService({ ctx, config, frameworkStore, engine, logger 
         const normalized = normalizeError(error)
         logger?.warn?.('dsh-prompt-weaver importConfig failed:', normalized.reason)
         return normalized
+      }
+    },
+
+    async takePending(request) {
+      try {
+        const clientKey = typeof request?.clientKey === 'string' ? request.clientKey : undefined
+        if (clientKey === undefined) return { ok: true, result: null }
+        const entry = pending.get(clientKey)
+        if (entry === undefined) return { ok: true, result: null }
+        pending.delete(clientKey)
+        if (Date.now() - entry.at > PENDING_TTL_MS) return { ok: true, result: null }
+        return { ok: true, result: entry.result }
+      } catch (error) {
+        return normalizeError(error)
+      }
+    },
+
+    async clearPending(request) {
+      try {
+        const clientKey = typeof request?.clientKey === 'string' ? request.clientKey : undefined
+        if (clientKey !== undefined) pending.delete(clientKey)
+        return { ok: true }
+      } catch (error) {
+        return normalizeError(error)
       }
     },
 
