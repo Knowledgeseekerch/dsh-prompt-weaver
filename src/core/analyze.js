@@ -2,13 +2,13 @@ import { TASK_TYPES } from './constants.js'
 import { freezeDeep, scriptCounts } from './utils.js'
 
 const TASK_KEYWORDS = Object.freeze({
-  code: ['代码', '实现', '函数', '类', '接口', '模块', '重构', '编译', '类型', 'api', '依赖', 'code', 'implement', 'function', 'class', 'module', 'refactor', 'compile', 'typescript', 'javascript', 'python'],
+  code: ['代码', '实现', '函数', '类', '接口', '模块', '重构', '编译', '类型', 'api', '依赖', '程序', '编程', '写代码', 'code', 'implement', 'function', 'class', 'module', 'refactor', 'compile', 'typescript', 'javascript', 'python', 'c++', 'c#', 'java', 'rust', 'golang', 'sql'],
   debug: ['报错', '错误', '失败', '异常', '崩溃', '调试', '修复', '问题', '登录', 'bug', 'error', 'exception', 'crash', 'fail', 'debug', 'fix', 'stack trace'],
   review: ['审查', '评审', 'review', 'code review', '检查代码', 'audit'],
   test: ['测试', '单元测试', '用例', 'test', 'unit test', 'coverage', 'vitest', 'jest'],
-  docs: ['文档', '注释', 'readme', 'document', 'documentation', 'comment'],
+  docs: ['文档化', '写文档', 'readme', 'documentation', 'api doc'],
   research: ['调研', '研究', '对比', '比较', '论文', '资料', 'research', 'compare', 'survey', 'paper'],
-  writing: ['写', '撰写', '文章', '文案', '邮件', '总结', 'write', 'article', 'essay', 'email', 'summary'],
+  writing: ['撰写', '写作', '写一篇', '写一段', '文章', '文案', '邮件', '总结', 'write an', 'article', 'essay', 'email', 'summary'],
   automation: ['脚本', '自动化', '流水线', '工作流', 'script', 'automation', 'workflow', 'ci', 'pipeline'],
 })
 

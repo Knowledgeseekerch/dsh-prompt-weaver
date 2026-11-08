@@ -25,6 +25,19 @@ const REQUEST_KEYS = new Set([
 
 const ITERATION_KEYS = new Set(['round', 'previousText', 'feedback'])
 
+const MEANINGFUL_CHAR = /[\p{L}\p{N}]/u
+const GIVE_UP = /^(算了|随便|都行|无所谓|不知道|你看着办|不弄了|没事)[。！!~～\s]*$/u
+
+/** 去掉空白、标点与 emoji 后是否还剩字母或数字。 */
+export function hasMeaningfulText(text) {
+  return MEANINGFUL_CHAR.test(String(text ?? ''))
+}
+
+/** 整句就是一句放弃语，没有可执行意图。 */
+export function looksLikeGivingUp(text) {
+  return GIVE_UP.test(String(text ?? '').trim())
+}
+
 export function createPromptWeaverEngine({
   config,
   frameworkStore,
@@ -52,6 +65,21 @@ export function createPromptWeaverEngine({
       throw new PromptWeaverError(
         'command-only',
         'The draft contains only a slash command. Add natural language after the command to enhance it.',
+      )
+    }
+
+    // 低信号输入：只有标点、emoji 或空白时直接拒绝，
+    // 不替用户凭空生成一个任务（这类输入无从判断真实意图）。
+    if (!hasMeaningfulText(input.text)) {
+      throw new PromptWeaverError(
+        'too-vague',
+        'The draft has no meaningful words; describe what you want enhanced.',
+      )
+    }
+    if (looksLikeGivingUp(input.text)) {
+      throw new PromptWeaverError(
+        'too-vague',
+        'The draft looks like a cancelled thought; add what you actually want to do.',
       )
     }
 

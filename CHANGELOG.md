@@ -4,6 +4,19 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-11-08
+
+### Fixed
+
+- Noise drafts such as `。`, `🤔` or `算了` were rewritten into a full task out of nothing; they are now rejected with `too-vague` instead of inventing intent.
+- `帮我写个 C++ 控制舵机的程序` was classified as writing because `writing` matched the bare character 写; the keyword list no longer contains it.
+- `docs` matched 注释, so code that merely asked for comments fell into the docs task type; that keyword is gone.
+- `code` had no entry for C++ / C# / Java / Rust / Go / SQL nor for 程序 / 编程, so programming requests landed in `general`.
+
+### Added
+
+- `tests/fixtures/testset.jsonl`: 49-case evaluation corpus (L0–L5 gradient, adversarial set, controlled same-intent set) kept in the repo for future regression work.
+
 ## [0.2.2] - 2026-11-08
 
 ### Changed
