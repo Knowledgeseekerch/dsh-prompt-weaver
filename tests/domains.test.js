@@ -90,7 +90,8 @@ test('blocking gaps are confirmed, the rest become parameters with defaults', ()
   assert.match(system, /at most three items/u)
 })
 
-test('a software draft with no probes does not invent gaps', () => {  const text = '帮我写个 Python 脚本批量缩图'
+test('a software draft with no probes does not invent gaps', () => {
+  const text = '帮我写个 Python 脚本批量缩图'
   const domains = detectDomains(text)
   const completeness = assessCompleteness({ draft: { originalText: text }, domains, locale: 'zh' })
   const system = buildSystemPrompt({
