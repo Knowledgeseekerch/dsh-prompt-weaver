@@ -191,11 +191,35 @@ window.__ModuleLoader__.load({
   0%, 100% { opacity: 0.55; }
   50% { opacity: 1; }
 }
-.dsh-pw-button.is-busy svg {
-  animation: dsh-pw-spin 900ms linear infinite;
+/* 增强中：不用任何角向运动。三件事同时发生，都是灯泡自己的物理过程——
+   1) 灯丝升温：泡体由暖黄 #FFEB99 升到近白 #FFFDE7；
+   2) 光晕呼吸：亮度起伏，像电流在跳；
+   3) 光波扩散：一道细环从泡体向外扩到 2.1 倍并淡出，这是「光正在散开」的可见证据。
+   只靠光晕缩放时，20px 里的变化不足 5px、肉眼看不出来，所以补了这圈环。 */
+.dsh-pw-button.is-busy .dsh-pw-body {
+  animation: dsh-pw-heat 1100ms ease-in-out infinite;
 }
-@keyframes dsh-pw-spin {
-  to { transform: rotate(360deg); }
+.dsh-pw-button.is-busy .dsh-pw-glow {
+  animation: dsh-pw-breathe-fast 1100ms ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.dsh-pw-button.is-busy .dsh-pw-wave {
+  animation: dsh-pw-wave 1100ms ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes dsh-pw-heat {
+  0%, 100% { fill: #FFEB99; }
+  55% { fill: #FFFDE7; }
+}
+@keyframes dsh-pw-breathe-fast {
+  0%, 100% { opacity: 0.35; }
+  55% { opacity: 0.85; }
+}
+@keyframes dsh-pw-wave {
+  0% { opacity: 0.9; transform: scale(0.55); }
+  100% { opacity: 0; transform: scale(2.1); }
 }
 .dsh-pw-closing {
   animation: dsh-pw-fade-out 420ms ease forwards;
@@ -338,6 +362,7 @@ window.__ModuleLoader__.load({
       h('line', { x1: 22.8, y1: 9.6, x2: 20.6, y2: 9.6 })
       ),
       h('path', {
+        className: 'dsh-pw-body',
         d: 'M12 3.4a5.6 5.6 0 0 0-3.4 10c.4.4.7.9.7 1.5v.6h5.4v-.6c0-.6.3-1.1.7-1.5A5.6 5.6 0 0 0 12 3.4z',
         fill: '#FFEB99',
         stroke: '#FFB300',
@@ -345,7 +370,18 @@ window.__ModuleLoader__.load({
         strokeLinejoin: 'round',
       }),
       h('rect', { x: 9.2, y: 16.1, width: 5.6, height: 1.9, rx: 0.9, fill: '#B0BEC5' }),
-      h('rect', { x: 9.8, y: 18.4, width: 4.4, height: 1.7, rx: 0.8, fill: '#78909C' }))
+      h('rect', { x: 9.8, y: 18.4, width: 4.4, height: 1.7, rx: 0.8, fill: '#78909C' }),
+      // 光波：平时不可见，增强时从泡体向外扩散一圈。
+      h('circle', {
+        className: 'dsh-pw-wave',
+        cx: 12,
+        cy: 9.6,
+        r: 5.2,
+        fill: 'none',
+        stroke: '#FFC107',
+        strokeWidth: 1.2,
+        opacity: 0,
+      }))
     }
 
     // 面板渲染一旦抛错，React 会把整棵子树卸掉——按钮就跟着消失了。
