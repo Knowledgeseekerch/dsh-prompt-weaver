@@ -459,6 +459,56 @@ const DOMAINS = Object.freeze([
       },
     ],
   },
+  {
+    // 日常交付物：PPT、Word 排版、Excel 表格。
+    // 这类任务的成败不在「写得好不好」，而在模板、字号、页序、数据来源这些
+    // 一开始没定、后面要返工一整晚的东西。
+    id: 'document',
+    keywords: [
+      'ppt', '幻灯片', '演示文稿', '演示', '答辩', '汇报', '课件', '开题', '路演', '宣讲',
+      'word', '文档', '报告', '说明书', '标书', '策划书', '简历', '排版', '页眉', '页脚',
+      'excel', '工作表', '模板', '字号', '版式', '目录',
+      'slide', 'deck', 'presentation', 'keynote', 'template', 'layout',
+    ],
+    dimensions: [
+      {
+        id: 'kind',
+        zh: '交付物类型与场合：是文档、演示还是表格，给谁看、在什么场合用',
+        en: 'the deliverable type and setting: document, deck, or sheet; who reads it and where it is used',
+        slots: { zh: ['类型', '受众与场合', '使用方式'], en: ['type', 'audience and setting', 'how it is used'] },
+      },
+      {
+        id: 'structure',
+        zh: '结构与页序：各章节或各页分别承担什么，为什么是这个顺序',
+        en: 'the structure and page order: what each section or slide carries, and why it comes in that order',
+        slots: { zh: ['大纲', '每页或每节的要点', '顺序'], en: ['outline', 'point per slide or section', 'order'] },
+      },
+      {
+        id: 'format',
+        zh: '格式规范：模板、字号与行距、页边距、编号与页码',
+        en: 'the formatting rules: template, type size and leading, margins, numbering and page numbers',
+        slots: { zh: ['模板', '字号与行距', '编号与页码'], en: ['template', 'type size and leading', 'numbering and pagination'] },
+      },
+      {
+        id: 'source',
+        zh: '内容来源：数据从哪来、引用按什么规范、哪些是既有材料',
+        en: 'the sources: where the numbers come from, which citation style applies, which material already exists',
+        slots: { zh: ['数据来源', '引用规范', '既有素材'], en: ['data source', 'citation style', 'existing material'] },
+      },
+      {
+        id: 'visual',
+        zh: '图表与视觉：用什么图、图上标什么、配色是否受既有规范约束',
+        en: 'charts and visuals: which chart type, what each chart must label, and whether colours are constrained',
+        slots: { zh: ['图表类型', '标注与单位', '配色'], en: ['chart type', 'labels and units', 'colour scheme'] },
+      },
+      {
+        id: 'delivery',
+        zh: '交付形态：文件格式、是否要可编辑、是否需要讲稿或备注页',
+        en: 'the delivery form: file format, whether it must stay editable, and whether speaker notes are needed',
+        slots: { zh: ['文件格式', '可编辑要求', '讲稿与备注'], en: ['file format', 'editable requirement', 'speaker notes'] },
+      },
+    ],
+  },
 ])
 
 const MAX_DOMAINS = 2

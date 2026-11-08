@@ -88,12 +88,25 @@ test('idleTimeoutMs 会先于总时限打断卡死的请求', async () => {
   assert.ok(elapsed < 1500, `空闲超时应当早于总时限，实际 ${elapsed}ms`)
 })
 
-test('自适应时限：短草稿低于配置硬顶，长草稿用满硬顶，小配置不被抬高', () => {
-  // 短草稿：配置 180s，但只给 ~20s，快速失败不干等。
+test('自适应时限：按输入规模放宽，配置是硬顶，小配置不被抬高', () => {
   const generous = { timeoutMs: 180000 }
-  assert.ok(resolveAdaptiveTimeout(generous, { originalText: '短草稿' }) < 60000)
-  // 长草稿：按字数放宽，上限就是配置值。
-  assert.equal(resolveAdaptiveTimeout(generous, { originalText: '字'.repeat(3000) }), 180000)
-  // 配置设得很小（想快速失败）时，自适应不得把它抬高。
-  assert.equal(resolveAdaptiveTimeout({ timeoutMs: 90 }, { originalText: '字'.repeat(3000) }), 90)
+  const short = resolveAdaptiveTimeout(generous, { originalText: '短草稿' }, { promptChars: 300, outputChars: 4000 })
+  const long = resolveAdaptiveTimeout(generous, { originalText: '字'.repeat(3000) }, { promptChars: 20000, outputChars: 4000 })
+  // 短提示词也不低于 30 秒：0.4.0 之后系统提示词本身就有几千字符。
+  assert.ok(short >= 30000, String(short))
+  assert.ok(short < 60000, String(short))
+  // 输入越长约宽，但都不越配置硬顶。
+  assert.ok(long > short, `${long} vs ${short}`)
+  assert.ok(long <= 180000, String(long))
+  // 想快速失败时，自适应不得把配置抬高。
+  assert.equal(resolveAdaptiveTimeout({ timeoutMs: 90 }, { originalText: '字'.repeat(3000) }, { promptChars: 9000 }), 90)
+})
+
+test('输出上限不会被当成典型输出用于估时', () => {
+  // maxResultChars 默认 40000，直接拿来估时会让预算永远顶到硬顶，自适应就失效了。
+  const generous = { timeoutMs: 180000 }
+  const huge = resolveAdaptiveTimeout(generous, { originalText: 'x' }, { promptChars: 1000, outputChars: 40000 })
+  const typical = resolveAdaptiveTimeout(generous, { originalText: 'x' }, { promptChars: 1000, outputChars: 4000 })
+  assert.equal(huge, typical)
+  assert.ok(typical < 180000, String(typical))
 })

@@ -4,6 +4,21 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-11-08
+
+Two fixes a real run exposed, plus the domain everyday work actually needs.
+
+### Added
+
+- A `document` domain (6 dimensions): deliverable type and setting, structure and page order, formatting rules, content sources, charts and labels, delivery form. "帮我做个项目汇报 PPT" and "用 Word 写一份采购申请" reached no domain before; a one-line deck request now reports the template, the outline, and the data sources it will be judged on.
+- Topic conventions for decks, résumés, and paper layout: fix the page count before collecting material, titles state conclusions rather than topics, a borrowed chart cites its origin on the chart, and references and citations correspond in both directions.
+- The corpus grew to 65 entries with four everyday-deliverable samples.
+
+### Fixed
+
+- The adaptive timeout was derived from draft length, so a fifteen-character request got a twenty-second budget. 0.4.0 pushed the system prompt toward ten thousand characters, and that budget cut a stream that was still producing tokens: `用flask做一个登录页` failed with `[timeout]` on a healthy model. The budget now derives from prompt size and expected output size, and the default ceiling moves from 45 s to 120 s. A genuinely stalled stream is still caught by `idleTimeoutMs`, which is what that setting is for.
+- The timeout message now reports the budget, the prompt size, and which setting to raise, instead of the uninformative "exceeded its total timeout".
+
 ## [0.5.0] - 2026-11-08
 
 The enhancer now carries domain knowledge, not only domain questions. 0.4.0 gave every domain a probe and a skeleton; this release gives it the technical decisions a professional would make without being asked.

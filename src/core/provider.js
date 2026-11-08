@@ -21,16 +21,27 @@ export function resolveInitialBudget(config, user) {
 
 /**
  * 总时限自适应：配置值是硬顶，自适应只在顶之下伸缩。
- * - 短草稿：按 20s 起步，比配置更快失败，用户不必干等；
- * - 长草稿：按字数放宽，最多用满配置值；
- * - 配置设得很小（想快速失败）时，自适应不会超过它。
- * 真正的兜底交给 idleTimeoutMs：慢但在推进的任务不会被误杀。
+ *
+ * 旧版只按草稿字数估时，结果是「一句话的草稿」只拿到 20 秒——而 0.4.0 之后
+ * 系统提示词本身已接近一万字符，20 秒连输出都开不了头，正在正常流式返回的
+ * 请求会被自己的预算砍掉。耗时由「输入规模 + 期望输出规模」决定，不是草稿字数。
+ *
+ * 所以：
+ * - 输入越长、期望输出越长，预算越大；
+ * - 配置的 timeoutMs 是硬顶，自适应不得越过它（想快速失败就把配置调小）；
+ * - 真正抓「卡死」的是 idleTimeoutMs，不是这里。
  */
-export function resolveAdaptiveTimeout(config, draft) {
-  const chars = typeof draft?.originalText === 'string' ? draft.originalText.length : 0
-  const estimated = 20000 + chars * 60
+export function resolveAdaptiveTimeout(config, draft, extras = {}) {
+  const draftChars = typeof draft?.originalText === 'string' ? draft.originalText.length : 0
+  const promptChars = Number.isFinite(extras.promptChars) ? extras.promptChars : draftChars
+  // maxResultChars 是输出上限（默认 4 万字符），不是典型输出。按上限估时会让
+  // 预算永远顶到硬顶，失去自适应意义；这里按典型增强结果的规模封顶估。
+  const outputChars = Number.isFinite(extras.outputChars) ? Math.min(extras.outputChars, 4000) : 4000
+  // 30 秒起步；输入每 2k 字符加 5 秒，输出每 1k 字符加 5 秒。取值偏保守：
+  // 多等几秒的代价，远小于把一次正常输出判成失败。
+  const estimated = 30000 + Math.ceil(promptChars / 2000) * 5000 + Math.ceil(outputChars / 1000) * 5000
   const configured = Number.isFinite(config.timeoutMs) ? config.timeoutMs : 45000
-  return Math.min(configured, Math.max(20000, estimated))
+  return Math.min(configured, Math.max(30000, estimated))
 }
 
 /**
@@ -65,15 +76,23 @@ export function createDshModelProvider({ ctx, config, session }) {
       }
 
       const cap = capOf(config)
+      // 预算按「提示词规模 + 期望输出规模」估，不再按草稿字数估。
+      const promptChars = String(system ?? '').length + String(user ?? '').length
+      const outputChars = Number.isFinite(config.maxResultChars) ? config.maxResultChars : 4000
+      const budgetMs = resolveAdaptiveTimeout(config, draft, { promptChars, outputChars })
       // 总时限自适应；重试仍共用同一个 deadline，不每轮重新计时。
-      const deadline = Date.now() + resolveAdaptiveTimeout(config, draft)
+      const deadline = Date.now() + budgetMs
       let budget = resolveInitialBudget(config, user)
 
       for (;;) {
         assertAbort(signal)
         const remaining = deadline - Date.now()
         if (remaining <= 0) {
-          throw new PromptWeaverError('timeout', `The enhancement exceeded its total timeout of ${config.timeoutMs}ms.`)
+          throw new PromptWeaverError(
+            'timeout',
+            `The enhancement exceeded its ${Math.round(budgetMs / 1000)}s budget (prompt ${promptChars} chars, output up to ${outputChars} chars). `
+              + 'A slower model or a longer draft needs a larger config.timeoutMs; a genuinely stuck stream is caught by idleTimeoutMs instead.',
+          )
         }
         try {
           return await streamOnce({ llm, route, system, user, budget, config, signal, timeoutMs: remaining })

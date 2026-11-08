@@ -45,6 +45,10 @@ export const DOMAIN_BLUEPRINTS = Object.freeze({
     zh: '目标与边界 → 阶段与阶段产出 → 前置条件 → 验收判据 → 风险与排除',
     en: 'goal and boundary → phases and deliverables → prerequisites → acceptance → risks and pre-emption',
   }),
+  document: Object.freeze({
+    zh: '类型与受众 → 大纲与每页要点 → 模板与字号 → 内容与数据来源 → 图表与标注 → 交付格式与讲稿',
+    en: 'type and audience → outline and point per slide → template and type scale → content and data sources → charts and labels → delivery format and speaker notes',
+  }),
 })
 
 /** 没命中任何领域时用的通用骨架：任何任务都能按它组织。 */

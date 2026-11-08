@@ -115,6 +115,24 @@ export const DOMAIN_CONVENTIONS = Object.freeze({
     Object.freeze({ zh: '每个阶段要有产出物，没有产出的阶段不是阶段', en: 'every phase ends with an artifact; a phase with no artifact is not a phase' }),
     Object.freeze({ zh: '验收判据要可观测：看到什么现象、测到什么数', en: 'acceptance must be observable: which sign, which number' }),
   ]),
+  document: Object.freeze([
+    Object.freeze({
+      zh: '先定模板、字号与页边距，再填内容；反过来做等于返工',
+      en: 'fix template, type scale, and margins before writing; the other order is rework',
+    }),
+    Object.freeze({
+      zh: '一页一个观点，标题写结论而不是话题（「成本下降 12%」而不是「成本分析」）',
+      en: 'one point per page, and the title states the conclusion, not the topic ("cost down 12%", not "cost analysis")',
+    }),
+    Object.freeze({
+      zh: '数据图必须标单位与来源；没有来源的数字不要放进汇报材料',
+      en: 'every chart labels its unit and source; a number without a source does not belong in a report',
+    }),
+    Object.freeze({
+      zh: '演示页不要塞满正文：要讲的内容进备注页，页面上只留结论与图',
+      en: 'do not fill slides with body text: prose goes into the speaker notes, the slide keeps the conclusion and the chart',
+    }),
+  ]),
 })
 
 /** 取该领域的惯例清单；没有登记返回空数组。 */
@@ -222,6 +240,46 @@ export const TOPIC_CONVENTIONS = Object.freeze([
       'settle material and heat treatment before dimensions; derive tolerances from the fit type, not from a guessed number',
       'every critical dimension needs a named datum (a face or a hole)',
       'fix the process route while designing: manufacturability decides which dimensions are legal',
+    ]),
+  }),
+  Object.freeze({
+    id: 'slides',
+    match: Object.freeze(['ppt', '幻灯片', '演示文稿', '汇报', '答辩', '路演', '宣讲', '课件', 'slide', 'deck']),
+    zh: Object.freeze([
+      '先定页数与每页一句话结论，再找素材；先堆素材一定会超页',
+      '引用别人的图要写出处，图上直接标来源，不要只在末尾列一条',
+    ]),
+    en: Object.freeze([
+      'fix the page count and the one-line conclusion per page before collecting material; material first always overruns',
+      'a borrowed chart cites its origin on the chart itself, not only in a closing list',
+    ]),
+  }),
+  Object.freeze({
+    id: 'resume',
+    match: Object.freeze(['简历', 'resume', 'cv', '求职']),
+    zh: Object.freeze([
+      '一页之内，倒序排列，最近的经历放最前',
+      '每条经历写清「做了什么 + 量化结果」，不写职责描述',
+      '按目标岗位的关键词改写措辞，让筛选和人都能对上',
+    ]),
+    en: Object.freeze([
+      'one page, reverse chronological, most recent first',
+      'each entry states what was done plus a quantified result, not a job description',
+      'mirror the target role vocabulary so both the screen and the reader match it',
+    ]),
+  }),
+  Object.freeze({
+    id: 'paper-format',
+    match: Object.freeze(['论文', '开题', '参考文献', '排版', '标书', '说明书']),
+    zh: Object.freeze([
+      '先确认格式规范（学校或单位的模板），标题层级、图表编号、参考文献格式都按它来',
+      '图表要有编号与标题，正文里必须被引用到，不能只贴不引',
+      '参考文献与正文一一对应：正文引了的都要列出，列出的都被引到',
+    ]),
+    en: Object.freeze([
+      'confirm the required format first (the school or organisation template): heading levels, figure and table numbering, reference style',
+      'every figure and table needs a number and a caption, and must be referenced in the body',
+      'references and citations must correspond one to one in both directions',
     ]),
   }),
 ])

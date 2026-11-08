@@ -59,7 +59,10 @@ export const DEFAULT_CONFIG = Object.freeze({
   maxResultChars: 40000,
   maxOutputTokens: 8192,
   maxOutputTokensCap: 16000,
-  timeoutMs: 45000,
+  // 总时限硬顶。0.4.0 之后系统提示词接近一万字符，45 秒会把一次
+  // 正常流式返回的请求砍断（"用flask做一个登录页" 就撞过这个）。
+  // 真正抓卡死的是 idleTimeoutMs，这里只做兜底。
+  timeoutMs: 120000,
   // 空闲超时：只衡量「多久没有新进展」，不限制总时长。
   // 模型持续吐字就一直等，连续这么久没有任何 token 才判定卡死。
   // 这比固定的总时限可靠：长任务不会被误杀，真卡住时又能及时中断。
