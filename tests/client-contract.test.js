@@ -53,3 +53,21 @@ test('the panel renders outside the composer slot and right click does nothing',
   assert.match(source, /class PanelBoundary extends React\.Component/u)
   assert.match(source, /getDerivedStateFromError/u)
 })
+
+test('the inline dictionaries keep the same keys in both languages', () => {
+  // locale/*.json 只是残缺副本（7 个键，且无人读取），已删除：
+  // client.js 的内联字典是唯一文案来源。这里锁住 en/zh 键集合一致，
+  // 防止新增文案只补一边——0.2.14 加 copy 系列时就漏过一次。
+  const keysOf = (name) => {
+    const start = source.indexOf(`const ${name} = {`)
+    assert.ok(start > 0, `missing dictionary: ${name}`)
+    const end = source.indexOf('\n    }', start)
+    assert.ok(end > start, `unterminated dictionary: ${name}`)
+    const block = source.slice(start, end)
+    return [...block.matchAll(/^\s{6}([A-Za-z_][A-Za-z0-9_]*):/gmu)].map(match => match[1]).sort()
+  }
+  const en = keysOf('en')
+  const zh = keysOf('zh')
+  assert.ok(en.length > 40, `expected a full dictionary, saw ${en.length} keys`)
+  assert.deepEqual(zh, en)
+})
