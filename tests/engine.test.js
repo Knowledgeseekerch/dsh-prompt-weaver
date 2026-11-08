@@ -71,7 +71,9 @@ test('engine rejects model output that adds unverified assumptions', async () =>
   await assert.rejects(() => engine.enhance({ text: 'Fix the login button.', mode: 'strict' }), /introduced an assumption/)
 })
 
-test('engine rejects output that loses the slash command or references', async () => {
+test('engine still delivers the text when it loses the slash command or references', async () => {
+  // 违规只作记录，不再否决整次增强：模型给了文本就交付，
+  // 否则用户点了增强却什么也拿不到，比拿到一份有偏离的结果更糟。
   const engine = createEngine({
     provider: createStaticModelProvider([JSON.stringify({
       enhancedPrompt: 'Fix the button.',
@@ -80,7 +82,12 @@ test('engine rejects output that loses the slash command or references', async (
       usedContext: [],
     })]),
   })
-  await assert.rejects(() => engine.enhance({ text: '/prompt fix @src/app.ts', mode: 'strict' }), /original-intent preservation/)
+  const result = await engine.enhance({ text: '/prompt fix @src/app.ts', mode: 'strict' })
+  assert.equal(result.ok, true)
+  assert.equal(result.text, 'Fix the button.')
+  assert.equal(result.quality.passed, false)
+  assert.ok(result.violations.length > 0)
+  assert.equal(result.violations.some(violation => violation.code === 'protected-item-lost'), true)
 })
 
 test('engine supports explicit framework selection', async () => {

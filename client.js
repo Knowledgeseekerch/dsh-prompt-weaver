@@ -44,6 +44,7 @@ window.__ModuleLoader__.load({
       unavailable: 'Prompt Weaver is unavailable here',
       failed: 'The model could not enhance this prompt',
       applied: 'Draft replaced. Nothing was sent.',
+      deviations: 'deviation(s)',
       undone: 'Previous version restored.',
       discarded: 'The draft changed, so this result was discarded.',
       imported: 'Configuration imported.',
@@ -94,6 +95,7 @@ window.__ModuleLoader__.load({
       unavailable: '当前环境不支持 Prompt Weaver',
       failed: '模型未能增强这条提示词',
       applied: '草稿已替换，未自动发送。',
+      deviations: '处偏离',
       undone: '已恢复上一版。',
       discarded: '草稿已变化，本次结果已丢弃。',
       imported: '配置已导入。',
@@ -432,9 +434,8 @@ window.__ModuleLoader__.load({
         // 否则用户改从面板走一遍，就能把丢了保护项/约束的结果直接盖进输入框，
         // 而一键增强那条路径明明是拦着的——同一条插件不该有两套门禁。
         if (!canApplyResult(value)) {
-          const message = `${value.violations?.length ?? 0} violation(s) - review before applying`
-          setStatus({ kind: 'error', message })
-          toast('error', message)
+          setStatus({ kind: 'error', message: t('failed') })
+          toast('error', t('failed'))
           return
         }
         // 结果直接写回输入框，然后面板收缩淡出，回落到会话。
@@ -805,8 +806,9 @@ window.__ModuleLoader__.load({
           const violations = value.violations?.length ?? 0
           const assumptions = value.assumptions?.length ?? 0
           const score = value.quality?.score
-          // 只有违规（丢了保护项、语言变了、臆造引用等）才阻止写回；
-          // 假设只是模型补充的前提，随 toast 提示即可，不该打断一键流程。
+          // 违规（丢了保护项、语言变了、臆造引用等）不再阻止写回：
+          // 用户点一次增强就该拿到结果，漏一个保护项不该让整次操作看起来失败。
+          // 偏离只在 toast 里提示一句，结果仍在面板里可查、可改。
           // 期间切换过会话：结果属于旧会话，不能写进当前输入框。
           if (sessionAtStart !== sessionIdRef.current) {
             toastFn('error', 'Session changed during enhancement; result discarded')
@@ -822,16 +824,18 @@ window.__ModuleLoader__.load({
             }
             const scoreText = score === undefined ? '' : ` (${t('score')}: ${score})`
             const notes = assumptions === 0 ? '' : ` - ${assumptions} assumption(s)`
-            toastFn('success', `${t('applied')}${scoreText}${notes}`)
+            const warn = violations === 0 ? '' : ` - ${violations} ${t('deviations')}`
+            toastFn('success', `${t('applied')}${scoreText}${notes}${warn}`)
             // 已经写回当前会话，清掉暂存，避免切回来时又弹出同一份结果。
             void Promise.resolve(rpc.call('/api', CLEAR_PENDING_ENDPOINT, {
               args: { agentId: sessionId, request: { clientKey: sessionId } },
             })).catch(() => {})
             return
           }
+          // 走不到写回（环境没给 setDraft）时，结果留在面板里，别丢。
           setPendingResult(value)
           setOpen(true)
-          toastFn('error', `${violations} violation(s) - review before applying`)
+          toastFn('success', `${t('applied')} - ${violations} ${t('deviations')}`)
         } catch (error) {
           toastFn('error', controller.signal.aborted
             ? 'Cancelled'
@@ -890,11 +894,13 @@ window.__ModuleLoader__.load({
       return match === null ? undefined : match[0]
     }
 
-    // 两条增强路径共用的写回门禁：只有零违规才允许自动落草稿。
-    // 定义成单点，免得下次又只在其中一条路径里拦住。
+    // 两条增强路径共用的写回判定：只判断「这次有没有拿到可用结果」。
+    // 违规检测照常算，但不再拦写回——点一次增强就该拿到东西，
+    // 模型偶尔漏掉一个保护项不该让整次操作看起来失败；
+    // 偏离情况在 toast 与面板里提示，由用户决定要不要退回去。
     function canApplyResult(result) {
       if (result === undefined || result === null) return false
-      return (result.violations?.length ?? 0) === 0
+      return typeof result.text === 'string' && result.text.length > 0
     }
 
     function renderQuality(result, t) {

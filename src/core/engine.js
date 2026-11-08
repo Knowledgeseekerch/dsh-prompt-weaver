@@ -136,31 +136,10 @@ export function createPromptWeaverEngine({
       allowedNewTokens: allowedContextTokens(context),
       mode,
     })
-    // standard / minimal 模式不再因为门禁失败就丢弃整次结果：
-    // 模型每次都给回了可用的增强文本，只是某个阈值没满足。
-    // 违规项随结果返回并在界面提示；strict 模式仍保留一票否决。
-    if (!quality.passed && mode === 'strict') {
-      const describe = (violation) => {
-        const item = violation.item
-        switch (violation.code) {
-          case 'protected-item-lost':
-            return `protected-item-lost(${item?.kind ?? '?'}: ${item?.text ?? '?'})`
-          case 'constraint-lost':
-            return `constraint-lost(${item?.marker ?? '?'})`
-          case 'language-changed':
-            return `language-changed(${item?.original ?? '?'} -> ${item?.enhanced ?? '?'})`
-          case 'invented-reference':
-            return `invented-reference(${(item?.references ?? []).map(r => r.text).join(', ')})`
-          default:
-            return String(violation.code)
-        }
-      }
-      throw new PromptWeaverError(
-        'fidelity-check-failed',
-        `The enhanced prompt failed the original-intent preservation check: ${quality.violations.map(describe).join('; ')}`,
-        { violations: quality.violations },
-      )
-    }
+    // 违规检测只做记录，不再否决结果：模型只要给回了增强文本就交付，
+    // 漏掉一个保护项、语言漂了、多引了一个路径，都不该让整次增强变成失败。
+    // quality.passed 与 violations 一并随结果返回，由面板展示给用户自己判断。
+    // strict 模式仍拒绝「模型擅自补前提」——那不是启发式比对，是模型编了事实。
 
     const comparison = comparePrompts(draft.originalText, structured.enhancedPrompt)
     const diff = diffSummary(draft.originalText, structured.enhancedPrompt)

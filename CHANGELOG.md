@@ -4,6 +4,16 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.16] - 2026-11-08
+
+### Changed
+
+- A quality violation no longer withholds the enhanced text. The engine rejected the whole run in `strict` mode, and the client skipped write-back in every mode, whenever a protected-item, constraint, language, or reference check failed. Both now deliver the text and report the deviation count instead. A run that produced usable text should not look like a failure because one heuristic threshold tripped.
+
+### Fixed
+
+- The deviation count in the one-click toast is localised instead of appending an English `deviation(s)` to an already-translated sentence.
+
 ## [0.2.15] - 2026-11-08
 
 ### Fixed
