@@ -142,6 +142,28 @@ window.__ModuleLoader__.load({
   background: color-mix(in srgb, var(--dsw-alias-bg-overlay, #000) 72%, transparent);
   backdrop-filter: blur(4px);
 }
+.dsh-pw-button.is-busy svg {
+  animation: dsh-pw-spin 900ms linear infinite;
+}
+@keyframes dsh-pw-spin {
+  to { transform: rotate(360deg); }
+}
+.dsh-pw-closing {
+  animation: dsh-pw-fade-out 420ms ease forwards;
+  pointer-events: none;
+}
+.dsh-pw-panel.dsh-pw-closing {
+  animation: dsh-pw-shrink 420ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: center;
+}
+@keyframes dsh-pw-shrink {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.12); opacity: 0; }
+}
+@keyframes dsh-pw-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
 .dsh-pw-panel {
   width: min(920px, 100%);
   max-height: min(88vh, 900px);
@@ -269,6 +291,7 @@ window.__ModuleLoader__.load({
       const [frameworks, setFrameworks] = React.useState([])
       const [feedback, setFeedback] = React.useState('')
       const [status, setStatus] = React.useState({ kind: 'idle' })
+      const [closing, setClosing] = React.useState(false)
       const [result, setResult] = React.useState(null)
       const [edited, setEdited] = React.useState('')
       const [history, setHistory] = React.useState([])
@@ -354,7 +377,9 @@ window.__ModuleLoader__.load({
         if (abortRef.current === controller) abortRef.current = null
         const value = response?.value ?? response
         if (value?.ok !== true) {
-          const message = typeof value?.message === 'string' && value.message.length > 0 ? value.message : t('failed')
+          const raw = typeof value?.message === 'string' && value.message.length > 0 ? value.message : t('failed')
+          const reason = typeof value?.reason === 'string' ? value.reason : undefined
+          const message = reason === undefined ? raw : `[${reason}] ${raw}`
           setStatus({ kind: 'error', message })
           toast('error', message)
           return
@@ -368,15 +393,23 @@ window.__ModuleLoader__.load({
         setView('enhanced')
         setFeedback('')
         setStatus({ kind: 'success' })
-        // 增强完成后直接把结果写回输入框，省掉「应用」这一步。
-        // 面板保持打开，方便查看 diff、质量分和上下文；写回失败不阻断结果展示。
+        // 结果直接写回输入框，然后面板收缩淡出，回落到会话。
+        let applied = false
         if (typeof inputActions?.setDraft === 'function') {
           try {
             inputActions.setDraft(value.text)
             toast('success', t('applied'))
+            applied = true
           } catch {
             // 写回异常时保留面板内的结果，用户仍可手动点「应用」
           }
+        }
+        // 只有写回成功才收起面板；写回失败时留在面板里，避免结果看不见
+        if (applied) {
+          setClosing(true)
+          window.setTimeout(() => {
+            if (mountedRef.current) onClose()
+          }, 420)
         }
       }
 
@@ -475,13 +508,13 @@ window.__ModuleLoader__.load({
       const busy = status.kind === 'loading'
 
       return h('div', {
-        className: 'dsh-pw-overlay',
+        className: closing ? 'dsh-pw-overlay dsh-pw-closing' : 'dsh-pw-overlay',
         role: 'dialog',
         'aria-modal': 'true',
         'aria-label': t('panelTitle'),
       },
       h('style', null, css),
-      h('div', { className: 'dsh-pw-panel' },
+      h('div', { className: closing ? 'dsh-pw-panel dsh-pw-closing' : 'dsh-pw-panel' },
         h('div', { className: 'dsh-pw-row' },
           h('strong', null, t('panelTitle')),
           h('span', { className: 'dsh-pw-muted' }, `(${t('iteration')}: ${result?.iteration?.round ?? 0})`),
@@ -490,7 +523,9 @@ window.__ModuleLoader__.load({
           )
         ),
         h('label', { className: 'dsh-pw-field' }, t('original'),
-          h('div', { className: 'dsh-pw-readonly' }, draft)
+          // 有结果后锁定显示增强前的原文：自动写回会改掉 draft，
+          // 不锁定的话原文与结果会显示同一份内容，差异对比就失效了。
+          h('div', { className: 'dsh-pw-readonly' }, result?.originalText ?? draft)
         ),
         attachmentCount > 0
           ? h('div', { className: 'dsh-pw-ok' }, `${t('attachments')}: ${attachmentCount}`)
@@ -640,6 +675,63 @@ window.__ModuleLoader__.load({
       const disabled = phase !== 'plain' || draft.trim().length === 0
       const title = phase !== 'plain' ? t('busy') : draft.trim().length === 0 ? t('empty') : t('action')
 
+      const [busy, setBusy] = React.useState(false)
+
+      // 一键增强：不弹面板，点一下就跑，结果直接写回输入框。
+      // 右键按钮仍可打开完整面板（差异对比、迭代、导入导出）。
+      const runDirect = React.useCallback(async () => {
+        if (rpc === undefined) {
+          toastFn('error', t('unavailable'))
+          return
+        }
+        if (disabled || busy) return
+        setBusy(true)
+        try {
+          // 模型输出有波动：同一句话可能这次过、下次不过。
+          // 对非确定性失败自动重试，确定性失败立即返回。
+          const deterministic = new Set(['sensitive-draft', 'command-only', 'too-long', 'invalid-value', 'unavailable', 'no-route'])
+          let value
+          for (let attempt = 0; attempt < 3; attempt += 1) {
+            try {
+              const response = await rpc.call('/api', ENDPOINT, {
+                args: {
+                  agentId: sessionId,
+                  request: {
+                    text: draft,
+                    mode: 'standard',
+                    frameworkId: 'auto',
+                    command: requestBase.command,
+                    occurrences: requestBase.occurrences,
+                    attachmentCount: requestBase.attachmentCount,
+                  },
+                },
+              })
+              value = response?.value ?? response
+            } catch {
+              value = undefined
+            }
+            if (value?.ok === true) break
+            const reason = value?.reason
+            if (reason !== undefined && deterministic.has(reason)) break
+          }
+          if (value?.ok !== true) {
+            const message = typeof value?.message === 'string' && value.message.length > 0
+              ? value.message
+              : t('failed')
+            const reason = typeof value?.reason === 'string' ? value.reason : undefined
+            toastFn('error', reason === undefined ? message : `[${reason}] ${message}`)
+            return
+          }
+          if (typeof inputActions?.setDraft === 'function') inputActions.setDraft(value.text)
+          const score = value.quality?.score
+          toastFn('success', score === undefined ? t('applied') : `${t('applied')} (${t('score')}: ${score})`)
+        } catch {
+          toastFn('error', t('failed'))
+        } finally {
+          setBusy(false)
+        }
+      }, [rpc, sessionId, draft, requestBase, disabled, busy, inputActions, t, toastFn])
+
       const toastNode = toast === null
         ? null
         : h(Toast, {
@@ -653,12 +745,16 @@ window.__ModuleLoader__.load({
         toastNode,
         h('button', {
           type: 'button',
-          className: 'dsh-pw-button',
+          className: busy ? 'dsh-pw-button is-busy' : 'dsh-pw-button',
           'aria-label': t('action'),
-          title,
-          disabled,
+          title: busy ? t('loading') : title,
+          disabled: disabled || busy,
           onMouseDown: event => event.preventDefault(),
-          onClick: () => setOpen(true),
+          onClick: runDirect,
+          onContextMenu: event => {
+            event.preventDefault()
+            setOpen(true)
+          },
         }, h(SparkleIcon)),
         open
           ? h(WeaverPanel, {

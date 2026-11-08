@@ -86,7 +86,9 @@ export function createPromptWeaverEngine({
     })
     const structured = parseModelOutput(output.content, { maxResultChars: activeConfig.maxResultChars })
 
-    if (structured.assumptions.length > 0) {
+    // strict 模式仍不接受任何假设；其余模式把假设随结果返回，
+    // 由界面展示，避免短草稿因为「模型列了假设」直接不可用。
+    if (mode === 'strict' && structured.assumptions.length > 0) {
       throw new PromptWeaverError(
         'unverified-assumption',
         'The model introduced an assumption. Answer the open questions or rewrite the draft, then retry.',
@@ -102,10 +104,28 @@ export function createPromptWeaverEngine({
       allowedNewTokens: allowedContextTokens(context),
       mode,
     })
-    if (!quality.passed) {
+    // standard / minimal 模式不再因为门禁失败就丢弃整次结果：
+    // 模型每次都给回了可用的增强文本，只是某个阈值没满足。
+    // 违规项随结果返回并在界面提示；strict 模式仍保留一票否决。
+    if (!quality.passed && mode === 'strict') {
+      const describe = (violation) => {
+        const item = violation.item
+        switch (violation.code) {
+          case 'protected-item-lost':
+            return `protected-item-lost(${item?.kind ?? '?'}: ${item?.text ?? '?'})`
+          case 'constraint-lost':
+            return `constraint-lost(${item?.marker ?? '?'})`
+          case 'language-changed':
+            return `language-changed(${item?.original ?? '?'} -> ${item?.enhanced ?? '?'})`
+          case 'invented-reference':
+            return `invented-reference(${(item?.references ?? []).map(r => r.text).join(', ')})`
+          default:
+            return String(violation.code)
+        }
+      }
       throw new PromptWeaverError(
         'fidelity-check-failed',
-        'The enhanced prompt failed the original-intent preservation check.',
+        `The enhanced prompt failed the original-intent preservation check: ${quality.violations.map(describe).join('; ')}`,
         { violations: quality.violations },
       )
     }
@@ -119,8 +139,10 @@ export function createPromptWeaverEngine({
       originalText: draft.originalText,
       analysis: publicAnalysis(baseAnalysis),
       openQuestions: structured.openQuestions,
+      assumptions: structured.assumptions,
       usedContext: structured.usedContext,
       quality,
+      violations: quality.violations,
       comparison,
       diff,
       context: contextSummary(context),

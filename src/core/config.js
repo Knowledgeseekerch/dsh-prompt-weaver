@@ -27,10 +27,20 @@ const TOP_LEVEL_KEYS = new Set([
   'frameworksFile',
   'provider',
   'model',
+  'reasoningEffort',
 ])
 
 const CONTEXT_KEYS = new Set(Object.keys(DEFAULT_CONFIG.context))
 const PRIVACY_KEYS = new Set(Object.keys(DEFAULT_CONFIG.privacy))
+
+function readReasoningEffort(value) {
+  if (value === undefined || value === null) return undefined
+  if (typeof value !== 'string') {
+    throw new PromptWeaverError('invalid-config', 'config.reasoningEffort must be a string.')
+  }
+  const trimmed = value.trim()
+  return trimmed.length === 0 ? undefined : trimmed
+}
 
 export function readConfig(input = {}) {
   if (!isPlainObject(input)) {
@@ -72,6 +82,7 @@ export function readConfig(input = {}) {
     context: readNested(contextInput, CONTEXT_KEYS, DEFAULT_CONFIG.context, CONTEXT_INTEGER_RANGES, 'config.context'),
     privacy: readNested(privacyInput, PRIVACY_KEYS, DEFAULT_CONFIG.privacy, PRIVACY_INTEGER_RANGES, 'config.privacy'),
     persistFrameworks: requireBoolean(input.persistFrameworks ?? DEFAULT_CONFIG.persistFrameworks, 'config.persistFrameworks'),
+    reasoningEffort: readReasoningEffort(input.reasoningEffort),
   }
 
   if (input.frameworksFile !== undefined) {

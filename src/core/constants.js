@@ -13,6 +13,7 @@ export const MODES = Object.freeze(['minimal', 'standard', 'strict'])
 
 export const TASK_TYPES = Object.freeze([
   'general',
+  'question',
   'code',
   'debug',
   'review',
@@ -53,7 +54,7 @@ export const DEFAULT_CONFIG = Object.freeze({
   defaultFramework: 'auto',
   maxDraftChars: 20000,
   maxResultChars: 40000,
-  maxOutputTokens: 2000,
+  maxOutputTokens: 8192,
   timeoutMs: 45000,
   temperature: 0.2,
   maxIterations: 5,

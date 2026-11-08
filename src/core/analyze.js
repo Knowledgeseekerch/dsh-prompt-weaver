@@ -49,7 +49,33 @@ export function detectLanguage(text) {
   return { primary: 'other', cjkRatio }
 }
 
+const QUESTION_MARKERS = /[？?]\s*$|谁|哪家|哪个|哪些|什么|如何|怎么|为什么|是否|多少|多久|who|what|which|how|why|whether/iu
+const REQUEST_MARKERS = /帮我|请帮|麻烦|需要你|给我|实现|修改|修复|创建|生成|写一?个|重构|implement|fix|create|generate|refactor/iu
+
+const OPERATION_MARKERS = /打开|启动|关闭|点击|点赞|关注|取关|发送|转发|下载|上传|登录|扫码|拖拽|截屏|录屏|导出|导入|open|launch|click|tap|like|follow|download|upload|login|export|import/iu
+const BUILD_MARKERS = /实现|编写|开发|搭建|页面|组件|接口|模型|代码|修复|问题|报错|异常|失败|implement|build|develop|component|page|api|fix|bug|error/iu
+
+/** 判断草稿是不是「对界面做操作」类诉求（打开某应用并执行动作）。 */
+export function looksLikeOperation(text) {
+  const trimmed = String(text ?? '').trim()
+  if (trimmed.length === 0 || trimmed.length > 300) return false
+  if (!OPERATION_MARKERS.test(trimmed)) return false
+  if (BUILD_MARKERS.test(trimmed)) return false
+  return true
+}
+
+/** 判断草稿是不是「一个提问」而不是「一个任务」。 */
+export function looksLikeQuestion(text) {
+  const trimmed = String(text ?? '').trim()
+  if (trimmed.length === 0 || trimmed.length > 300) return false
+  if (!QUESTION_MARKERS.test(trimmed)) return false
+  if (REQUEST_MARKERS.test(trimmed)) return false
+  return true
+}
+
 export function detectTaskType(text) {
+  if (looksLikeQuestion(text)) return { type: 'question', confidence: 0.8 }
+  if (looksLikeOperation(text)) return { type: 'automation', confidence: 0.75 }
   const normalized = text.toLowerCase()
   const scores = new Map()
   for (const [type, keywords] of Object.entries(TASK_KEYWORDS)) {

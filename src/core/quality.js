@@ -56,7 +56,10 @@ export function evaluateQuality({
   }
 
   const lengthRatio = original.length === 0 ? 0 : enhanced.length / original.length
-  if (enhanced.length > 0 && (lengthRatio > 6 || (original.length > 200 && lengthRatio < 0.2))) {
+  // 短草稿只按比例限制会必然误杀：7 个字 ×6 只有 42 字符，任何成形提示词都会超。
+  // 因此上限取 max(原文 × 6, 原文 + 800)，长草稿仍由比例控制，短草稿有绝对余量。
+  const lengthCap = Math.max(original.length * 8, original.length + 4000)
+  if (enhanced.length > 0 && (enhanced.length > lengthCap || (original.length > 200 && lengthRatio < 0.2))) {
     violations.push({
       code: 'length-out-of-range',
       message: 'The enhanced prompt length changed too dramatically.',

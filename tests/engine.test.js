@@ -68,7 +68,7 @@ test('engine rejects model output that adds unverified assumptions', async () =>
       usedContext: [],
     })]),
   })
-  await assert.rejects(() => engine.enhance({ text: 'Fix the login button.' }), /introduced an assumption/)
+  await assert.rejects(() => engine.enhance({ text: 'Fix the login button.', mode: 'strict' }), /introduced an assumption/)
 })
 
 test('engine rejects output that loses the slash command or references', async () => {
@@ -80,7 +80,7 @@ test('engine rejects output that loses the slash command or references', async (
       usedContext: [],
     })]),
   })
-  await assert.rejects(() => engine.enhance({ text: '/prompt fix @src/app.ts' }), /original-intent preservation/)
+  await assert.rejects(() => engine.enhance({ text: '/prompt fix @src/app.ts', mode: 'strict' }), /original-intent preservation/)
 })
 
 test('engine supports explicit framework selection', async () => {

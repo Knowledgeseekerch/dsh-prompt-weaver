@@ -4,6 +4,33 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-08
+
+### Added
+
+- `question` task type: a draft that is a single question is sharpened into a sharper question instead of being expanded into a task plan. The framework has one section, so a counter-question list cannot be produced structurally.
+- `automation` task type: operation requests such as "open X and like Y" expand into approach / steps / success check / failure handling, and are no longer captured by the `engineering` framework.
+- `reasoningEffort` config field, forwarded to `llm.stream` when set.
+- Failure messages now carry their reason code, shown as `[reason] message`.
+
+### Changed
+
+- The quality gate no longer discards the whole result in `standard`/`minimal` mode; violations are returned with the result. `strict` keeps the one-vote veto.
+- Output token budget is adaptive: `max(configured, draftChars * 2 + 2000)`, capped at 16000, and doubled when the model reports `max-tokens`.
+- The composer button enhances in one click without opening the panel; right-click still opens the full panel.
+- Prompt rules now distinguish sharpening (allowed) from scope expansion (forbidden), with the test "could the user still say that is exactly what I asked for?".
+- At most three open questions, and a counter-question may not replace an answer.
+- Default context and history budgets narrowed to 2 files / 16384 bytes and 4 messages / 2000 chars.
+
+### Fixed
+
+- Normal completion was treated as a failure: DSH reports `reason.kind = "stop"`, not `"completed"`.
+- The panel was nearly unreadable because three theme tokens do not exist in the DSH theme (`--dsw-alias-bg-primary`, `--dsw-alias-bg-secondary`, `--dsw-alias-border-primary`).
+- The length gate rejected short drafts: `original * 6` allowed only 42 characters for a 7-character draft.
+- Parsing aborted the run when the model wrapped JSON in prose, added an unknown field, or returned more items than the limit.
+- The original draft pane followed the live composer, so diff comparison became useless after auto-write-back.
+- The enhanced text could include the original draft, a `---` separator, and an "optimized prompt" label.
+
 ## [0.1.1] - 2026-11-08
 
 ### Fixed

@@ -14,9 +14,22 @@ export const BUILTIN_FRAMEWORKS = freezeDeep([
       section('goal', '目标', 'Goal', '用户要完成的一件事；只重述已有意图，不添加新需求。', 'The one thing the user wants; restate the existing intent only and add no new requirements.'),
       section('context', '上下文', 'Context', '仅使用草稿和参考材料中出现的信息。', 'Use only information present in the draft and reference material.'),
       section('constraints', '约束', 'Constraints', '逐条保留用户原有约束；没有就省略本节。', 'Preserve each user constraint verbatim; omit this section if none exist.'),
-      section('open-questions', '待确认', 'Open questions', '只列出影响执行的缺失信息，不假设答案。', 'List only missing information that affects execution; do not invent answers.'),
+      section('open-questions', '待确认', 'Open questions', '只列出影响执行的缺失信息，最多 3 条；不假设答案，不用反问替代回答。', 'List at most three missing details that affect execution; do not invent answers, and never replace an answer with counter-questions.'),
       section('output', '输出', 'Output', '描述用户明确要求的交付物或回复形态。', 'Describe the deliverable or response form explicitly requested by the user.'),
       section('validation', '验证', 'Validation', '只写用户已有的验证方式；缺失时列入待确认。', 'Include only verification the user already provided; otherwise move it to open questions.'),
+    ],
+  },
+  {
+    schemaVersion: 1,
+    id: 'question',
+    name: { zh: '问题澄清', en: 'Question sharpening' },
+    description: {
+      zh: '把一句话提问写得更具体、更可回答，保持问句形态。',
+      en: 'Make a one-line question sharper and more answerable, keeping it a question.',
+    },
+    taskTypes: ['question'],
+    sections: [
+      section('question', '问题', 'Question', '把原问题写得更具体：补明主体、对象、范围或判断依据；输出仍是一个问句，不拆成任务、不列反问、不添加原句未问的内容。', 'Sharpen the question: name the subject, object, scope or evidence needed. The output stays a single question - no task plan, no counter-questions, nothing the draft did not ask for.'),
     ],
   },
   {
@@ -42,14 +55,31 @@ export const BUILTIN_FRAMEWORKS = freezeDeep([
       zh: '面向功能实现与重构：目标、范围、现状、期望、约束、验收。',
       en: 'For implementation and refactoring: goal, scope, current behavior, expected behavior, constraints, and acceptance.',
     },
-    taskTypes: ['code', 'automation'],
+    taskTypes: ['code'],
     sections: [
       section('goal', '目标', 'Goal', '说明要实现的变更，不扩大需求。', 'State the change to implement without expanding the request.'),
       section('scope', '范围', 'Scope', '列出用户点名的文件、模块、符号和边界。', 'List files, modules, symbols, and boundaries explicitly named by the user.'),
       section('current', '现状', 'Current behavior', '只描述用户或参考材料说明的现状。', 'Describe only behavior stated by the user or reference material.'),
-      section('expected', '期望行为', 'Expected behavior', '给出可观察的期望结果。', 'Give an observable expected result.'),
+      section('expected', '期望行为', 'Expected behavior', '逐条列出原话点名的每个可观察结果，一条一行；不得只写其中一个，也不得合并成单一最终状态。', 'List every observable outcome the draft names, one per line; never write only one of them or collapse them into a single final state.'),
       section('constraints', '约束与非目标', 'Constraints and non-goals', '保留技术约束、兼容性要求和明确的非目标。', 'Preserve technical constraints, compatibility requirements, and explicit non-goals.'),
       section('validation', '验收与验证', 'Acceptance and validation', '写用户提供的测试或验收方式；缺失时列为待确认。', 'Include tests or acceptance criteria supplied by the user; otherwise list as an open question.'),
+    ],
+  },
+  {
+    schemaVersion: 1,
+    id: 'automation',
+    name: { zh: '自动化实现', en: 'Automation' },
+    description: {
+      zh: '把「打开 X 并做 Y」这类操作诉求展开成可执行方案：手段、步骤、成功判定、异常处理。',
+      en: 'Turn an operation request such as "open X and do Y" into an executable plan: approach, steps, success check, failure handling.',
+    },
+    taskTypes: ['automation'],
+    sections: [
+      section('goal', '目标', 'Goal', '一句话写清要对哪个对象做什么，不扩大范围。', 'State in one line what to do to which object; do not widen the scope.'),
+      section('approach', '实现方式', 'Approach', '指出这类操作必然需要的实现手段（自动化脚本、界面操作或系统接口）；不引入草稿未提的第三方依赖。', 'Name the technical means this operation necessarily needs (automation script, UI actions, or a system interface); introduce no third-party dependency the draft did not mention.'),
+      section('steps', '执行步骤', 'Steps', '展开成可执行步骤：启动、定位目标、执行动作、确认结果。', 'Expand into executable steps: launch, locate the target, perform the action, confirm the result.'),
+      section('success', '成功判定', 'Success check', '写一个可观察的完成标志，例如目标控件的状态发生变化。', 'State one observable completion signal, such as the target control changing state.'),
+      section('failure', '异常处理', 'Failure handling', '说明目标未出现、操作被拦截、重复执行时的处理；不新增功能。', 'Say how to handle a missing target, a blocked action, or repeated runs; add no new features.'),
     ],
   },
   {
