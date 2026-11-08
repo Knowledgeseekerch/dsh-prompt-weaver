@@ -4,6 +4,13 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7] - 2026-11-08
+
+### Fixed
+
+- The write-back guard treated an assumption as a blocker, so any draft the model had to make an assumption about (for example "打开抖音并点赞") opened the panel instead of applying. Only violations block now; assumptions are reported in the toast.
+- The panel rendered the result twice: an editable textarea plus a read-only `pre` with the same text. The `pre` is only used for the diff view now.
+
 ## [0.2.6] - 2026-11-08
 
 ### Added

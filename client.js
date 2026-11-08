@@ -615,9 +615,10 @@ window.__ModuleLoader__.load({
               onChange: event => setEdited(event.target.value),
             })
           ),
+          // 只在 diff 视图额外显示对比；否则结果会被 textarea 和 pre 重复渲染两份。
           view === 'diff'
             ? h('pre', { className: 'dsh-pw-readonly' }, renderDiff(result.originalText, edited))
-            : h('pre', { className: 'dsh-pw-readonly' }, edited),
+            : null,
           h('label', { className: 'dsh-pw-field' }, t('feedback'),
             h('input', {
               className: 'dsh-pw-input',
@@ -734,15 +735,18 @@ window.__ModuleLoader__.load({
           const violations = value.violations?.length ?? 0
           const assumptions = value.assumptions?.length ?? 0
           const score = value.quality?.score
-          if (violations === 0 && assumptions === 0 && typeof inputActions?.setDraft === 'function') {
+          // 只有违规（丢了保护项、语言变了、臆造引用等）才阻止写回；
+          // 假设只是模型补充的前提，随 toast 提示即可，不该打断一键流程。
+          if (violations === 0 && typeof inputActions?.setDraft === 'function') {
             inputActions.setDraft(value.text)
-            toastFn('success', score === undefined ? t('applied') : `${t('applied')} (${t('score')}: ${score})`)
+            const scoreText = score === undefined ? '' : ` (${t('score')}: ${score})`
+            const notes = assumptions === 0 ? '' : ` - ${assumptions} assumption(s)`
+            toastFn('success', `${t('applied')}${scoreText}${notes}`)
             return
           }
-          // 有违规或假设时先不覆盖草稿：交给面板展示，由用户确认后再应用。
           setPendingResult(value)
           setOpen(true)
-          toastFn('error', `${violations} violation(s), ${assumptions} assumption(s) - review before applying`)
+          toastFn('error', `${violations} violation(s) - review before applying`)
         } catch {
           toastFn('error', controller.signal.aborted ? 'Cancelled' : t('failed'))
         } finally {
