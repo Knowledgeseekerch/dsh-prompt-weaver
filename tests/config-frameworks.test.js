@@ -9,7 +9,7 @@ test('default config is frozen and valid', () => {
   const config = readConfig()
   assert.equal(config.mode, 'standard')
   assert.equal(config.defaultFramework, 'auto')
-  assert.equal(config.context.maxFiles, 10)
+  assert.equal(config.context.maxFiles, 2)
   assert.equal(Object.isFrozen(config), true)
 })
 

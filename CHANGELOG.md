@@ -4,6 +4,17 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2026-11-08
+
+### Changed
+
+- The shipped defaults now match what 0.2.0 announced: `context.maxFiles` 2, `context.maxTotalBytes` 16384, `maxConversationMessages` 4, `maxConversationChars` 2000. Previously only the local profile config was narrowed, so fresh installs kept the old 10/12/8000 values.
+- README states the current test count and install tag, and describes assumption handling as it actually behaves (`standard` returns them, `strict` rejects them).
+
+### Added
+
+- `schemas/config.schema.json` gains `maxOutputTokensCap` and `reasoningEffort`, so the schema covers every field `readConfig()` accepts.
+
 ## [0.2.4] - 2026-11-08
 
 ### Fixed

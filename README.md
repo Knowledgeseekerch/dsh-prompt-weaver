@@ -23,7 +23,7 @@ Compared with the public `dsh-prompt-enhance` bundle used as a compatibility ref
 - **Mixed-draft handling.** Slash commands are no longer a blanket rejection. They are preserved as protected items, and attachments are counted/preserved instead of blocking enhancement.
 - **A customizable framework system**, including validation, conflict policies, import/export, optional persistence, and task-type selection.
 - **An original-intent gate**, including protected-item, constraint, language, invented-reference, and length checks before a draft is replaced.
-- **Explicit assumption rejection** rather than silently accepting inferred requirements.
+- **Assumptions surfaced, not swallowed** — `standard` returns them with the result, `strict` refuses them.
 - **Deterministic quality metrics**, before/after comparison, diff summary, and bounded multi-round feedback.
 - **More explicit privacy controls**, including sensitive-draft blocking, context redaction, metadata-only results, and no enhancement-history persistence.
 - **A zero-dependency CLI** for offline enhancement, comparison, framework/config management, and reproducible test workflows.
@@ -33,7 +33,7 @@ This is not a claim that one model or prompt style is universally superior. The 
 
 ## Status
 
-- Core engine, Host service, Web composer control, CLI, examples, and 52 automated tests are included.
+- Core engine, Host service, Web composer control, CLI, examples, and 83 automated tests are included.
 - The original-intent gate, mixed-draft parser, framework store, config import/export, privacy handling, context collector, and Host/LLM integration are covered by tests.
 - Compatibility was implemented against the public plugin API shape used by existing DSH bundles and the official Web input contract (`draft`, `phase`, `occurrences`, `attachmentIds`). It has **not** yet been smoke-tested against a live DSH release; see [docs/compatibility.md](docs/compatibility.md).
 
@@ -59,7 +59,7 @@ npm test
 In DSH Web, use `install_bundle` with the absolute path of the cloned directory. For repeatable installs, pin a commit:
 
 ```bash
-dsh plugin --profile web add github:Knowledgeseekerch/dsh-prompt-weaver#v0.1.0
+dsh plugin --profile web add github:Knowledgeseekerch/dsh-prompt-weaver#v0.2.4
 ```
 
 Refresh the Web client. The sparkle button appears in the composer tool row. It does not send messages, listen for keystrokes, or modify project files.
