@@ -134,7 +134,7 @@
 
 ```powershell
 cd D:\AI\agent\2026-11-07-23-53-35\dsh-prompt-weaver
-node --test "tests/*.test.js"      # 期望 pass 127 / fail 0
+node --test "tests/*.test.js"      # 期望 pass 130 / fail 0
 node scripts/check.mjs             # 期望 check ok: 52 JS / 11 JSON
 node scripts/lint.mjs              # 期望 lint ok: 85 file(s)
 ```
