@@ -8,10 +8,12 @@
 |---|---|
 | 源码 | `D:\AI\agent\2026-11-07-23-53-35\dsh-prompt-weaver` |
 | 本地安装方式 | junction：`~/.dsh/profiles/desktop/node_modules/dsh-prompt-weaver` 直连源码 |
-| 已发布版本 | `v0.4.0`（远端最新 tag） |
+| 已发布版本 | `v0.5.0`（远端最新 tag） |
 | 未发布提交 | 无 |
-| 测试 | 155 项全过 |
-| 静态检查 | `node scripts/check.mjs`（59 JS / 10 JSON）与 `scripts/lint.mjs`（91 文件）通过 |
+| 测试 | 157 项全过 |
+| 静态检查 | `node scripts/check.mjs`（60 JS / 10 JSON）与 `scripts/lint.mjs`（92 文件）通过 |
+
+**能力变更（0.5.0）**：从「知道该问什么」走到「知道该怎么做」。新增 `src/core/knowledge.js`，两层惯例：① **领域惯例**——该领域的工作纪律（采样要滤波并限幅、代码注明库与引脚与可调参数、校验放服务端、给对账数、关键尺寸给基准、每步写排除目的）；② **话题惯例**——由草稿里的具体线索触发，不按整个领域灌：「热电偶」→ 冷端补偿与 LSB 换算，「PID／温控」→ 采样周期、积分饱和、整定方法与初值，「加热／PWM」→ 功率器件与过流过热保护，「登录」→ 密码哈希、统一失败提示、服务端校验，「csv 合并」→ 列结构对齐、判重口径、行数对账，「蓝屏」→ 停止码、安全模式二分、内存与磁盘检测。分开的理由是「智能小车」和「热电偶采集」同属 hardware，却不该拿到同一批建议。惯例在提示词里是**可替换的默认值**：采用、写明依据、标注可替换，不选型、不报价、不承诺厂商。`tests/workbuddy-parity.test.js` 用五条高质量答案做基准，断言它们点名的工程要素在维度、槽位、探针、骨架或惯例里必须有对应，少一项就测试失败。
 
 **能力变更（0.4.0 大版本，收尾版）**：把「只有两个领域能判」补成「九个领域全都能判」，并把「只报缺口」补成「先给骨架」。
 
@@ -43,7 +45,7 @@
 单点修复不单独发版
 ```
 
-发布后计数清零，重新累积。当前：**0 / 5**（v0.4.0 刚发）。
+发布后计数清零，重新累积。当前：**0 / 5**（v0.5.0 刚发）。
 
 `0.2.11` ~ `0.2.13` 是例外：那几版在排查一个阻塞性故障（插件完全不可用），快速迭代是为了恢复可用。
 
@@ -126,9 +128,11 @@
 
 `0.2.14` 消耗 4 处：`sessionIdRef` 修复、复制按钮、`assumptions` 展示、LCS diff。
 
+`0.5.0` 消耗 5 处：领域惯例层、话题惯例层、按线索挑选、提示词注入为可替换默认值、对标测试补齐惯例断言。
+
 `0.4.0` 消耗 10 处（大版本）：`diagnosis` 领域、`data` 领域、五个领域补探针、控制器型号识别、「8mm 厚」写法、栈词与润色词与清单词、否定式约束语义族自查、provider 完成事件、abort 形态识别、Windows CI（并因此修掉 `cli:smoke` 的 `/dev/null`）。
 
-当前 **0 / 5**，下一版是 `0.4.1`。
+当前 **0 / 5**，下一版是 `0.5.1`。
 
 **记录约定**：每发现一处可改进点，直接追加到本清单，不再逐次征求确认。用户 2026-11-08 明确要求。
 
@@ -145,9 +149,9 @@
 
 ```powershell
 cd D:\AI\agent\2026-11-07-23-53-35\dsh-prompt-weaver
-node --test "tests/*.test.js"      # 期望 pass 148 / fail 0
-node scripts/check.mjs             # 期望 check ok: 57 JS / 10 JSON
-node scripts/lint.mjs              # 期望 lint ok: 89 file(s)
+node --test "tests/*.test.js"      # 期望 pass 157 / fail 0
+node scripts/check.mjs             # 期望 check ok: 60 JS / 10 JSON
+node scripts/lint.mjs              # 期望 lint ok: 92 file(s)
 npm run cli:smoke                  # 期望 cli smoke ok（跨平台，不再依赖 /dev/null）
 npm run frameworks:validate        # 期望 ok: 2 framework file(s) valid
 ```

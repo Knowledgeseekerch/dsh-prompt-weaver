@@ -1,8 +1,9 @@
 import { describeDimensions, pickSlots } from './domains.js'
 import { GENERIC_BLUEPRINT, blueprintFor } from './blueprints.js'
+import { conventionsForDraft } from './knowledge.js'
 import { freezeDeep } from './utils.js'
 
-export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultChars, domains, completeness }) {
+export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultChars, domains, completeness, draftText = '' }) {
   const instructions = [
     'You are a prompt enhancement engine for an AI coding and general-purpose assistant.',
     'Return one JSON object and no other text.',
@@ -64,6 +65,15 @@ export function buildSystemPrompt({ mode, framework, locale = 'en', maxResultCha
     const skeleton = (domainId !== undefined ? blueprintFor(domainId, locale) : undefined)
       ?? (locale === 'zh' ? GENERIC_BLUEPRINT.zh : GENERIC_BLUEPRINT.en)
     instructions.push(`Structure the enhanced prompt along this work breakdown unless the draft already gives its own: ${skeleton}. The skeleton fixes the order and the coverage of a complete answer; it is a skeleton, not a decision. Never fill it with parts, numbers, prices, or vendors the draft did not mention.`)
+
+    // 惯例层：行业已有共识、用户通常不会写的技术决定。
+    // 只要求「请说明冷端补偿」和直接说「必须做冷端补偿，否则读数随室温漂移」是两回事——
+    // 前者把专业判断又推回给用户，后者才是替他把这件事想过了。
+    const conventions = conventionsForDraft(draftText, { domainId, locale })
+    if (conventions.length > 0) {
+      instructions.push('These are the conventional decisions for this kind of work. Adopt each unless the draft contradicts it, state the ones that shape the deliverable, and mark them replaceable. Name the class of part, and at most one common representative as an example; never a price and never a commitment to a vendor:')
+      for (const line of conventions) instructions.push(`- ${line}`)
+    }
   }
 
   // 缺口分两条路走：堵住任务定义的才问人，其余折成「参数 + 默认值」。

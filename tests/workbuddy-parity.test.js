@@ -92,3 +92,38 @@ test('a draft with no domain still gets a generic skeleton', () => {
   })
   assert.match(system, /目标 → 输入与前提 → 步骤/u)
 })
+
+function systemFor(text) {
+  return buildSystemPrompt({
+    mode: 'standard',
+    framework: undefined,
+    locale: 'zh',
+    maxResultChars: 4000,
+    domains: detectDomains(text),
+    draftText: text,
+  })
+}
+
+test('the prompt carries conventional decisions, not only the questions', () => {
+  // 只问「冷端补偿怎么处理」是转嫁判断；直接给出「必须做、否则读数随室温漂移」才算替他想过。
+  const hardware = systemFor('用 STM32 读取热电偶温度')
+  assert.match(hardware, /冷端补偿/u)
+  assert.match(hardware, /LSB/u)
+  assert.match(hardware, /功率器件/u)
+  assert.match(hardware, /滤波/u)
+
+  const software = systemFor('用 Flask 做一个登录页')
+  assert.match(software, /bcrypt/u)
+  assert.match(software, /服务端/u)
+
+  const diagnosis = systemFor('电脑蓝屏了怎么排查')
+  assert.match(diagnosis, /停止码/u)
+  assert.match(diagnosis, /安全模式/u)
+  assert.match(diagnosis, /memtest/u)
+})
+
+test('a convention is a replaceable default, never a vendor commitment', () => {
+  const system = systemFor('用 STM32 读取热电偶温度')
+  assert.match(system, /mark them replaceable/u)
+  assert.match(system, /never a price/u)
+})

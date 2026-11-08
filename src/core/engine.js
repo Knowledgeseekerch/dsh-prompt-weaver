@@ -125,7 +125,7 @@ export function createPromptWeaverEngine({
     } catch {
       completeness = undefined
     }
-    const system = buildSystemPrompt({ mode, framework, locale, maxResultChars: activeConfig.maxResultChars, domains, completeness })
+    const system = buildSystemPrompt({ mode, framework, locale, maxResultChars: activeConfig.maxResultChars, domains, completeness, draftText: draft.originalText })
     const user = buildUserPayload({ draft, analysis: baseAnalysis, framework, context, iteration, locale, domains, completeness })
     const output = await modelProvider.complete({
       system,

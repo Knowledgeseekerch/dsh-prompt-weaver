@@ -4,6 +4,26 @@ All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-11-08
+
+The enhancer now carries domain knowledge, not only domain questions. 0.4.0 gave every domain a probe and a skeleton; this release gives it the technical decisions a professional would make without being asked.
+
+### Added
+
+- `src/core/knowledge.js`, two layers of conventional decisions:
+  - **Domain conventions** — the working discipline of a domain: filter and clamp samples, state the library version and the pin mapping, validate on the server, reconcile row counts, name the datum, and so on.
+  - **Topic conventions** — triggered by concrete cues in the draft rather than by the whole domain. "用 STM32 读热电偶" pulls cold-junction compensation and the LSB derivation; "PID 温控" pulls the sampling period, integral windup, and a tuning method with initial values; "登录页" pulls password hashing, a uniform failure message, and server-side validation; "csv 合并" pulls column alignment, a fixed duplicate rule, and the row reconciliation; "蓝屏" pulls the stop code, safe-mode bisection, and separate memory and disk health checks.
+- The system prompt states these as defaults: adopt, state, and mark replaceable. It names a class of part and at most one common representative, never a price and never a vendor commitment.
+- `tests/workbuddy-parity.test.js` measures the enhancer against the five requests whose strong answers it was compared with. Every element those answers name must exist in the domain's dimensions, slots, probes, skeleton, or conventions, so a regression that drops cold-junction compensation or the row reconciliation fails the suite.
+
+### Changed
+
+- Conventions are selected by cue, not by whole domain: a smart-car draft and a thermocouple draft both land in `hardware` but do not need the same advice. Selecting by cue keeps the prompt short and the advice relevant.
+
+### Fixed
+
+- The work breakdown and the convention list no longer repeat the same sentence for one domain.
+
 ## [0.4.0] - 2026-11-08
 
 A coverage release. 0.3.3 could recognise "this looks like a diagnostics task" and then measure nothing, because only two of nine domains had probes. That gap is closed: every built-in domain now answers "what did the user leave out", and two high-frequency domains were missing entirely.
